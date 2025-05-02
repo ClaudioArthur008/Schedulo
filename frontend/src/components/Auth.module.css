@@ -1,0 +1,186 @@
+.userTypeSelector {
+    display: flex;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    border: 1px solid #e5e7eb;
+  }
+  
+  .userTypeButton {
+    flex: 1;
+    padding: 12px;
+    background-color: #f9fafb;
+    border: none;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .userTypeButton.active {
+    background-color: #30B058;
+    color: white;
+  }
+  
+  .userTypeButton:not(.active):hover {
+    background-color: #e5e7eb;
+  }
+  
+  /* Modification pour s'assurer que les boutons sont bien ajustés */
+  .userTypeButton:first-child {
+    border-right: 1px solid #e5e7eb;
+  }
+  
+  .userTypeButton.active:first-child {
+    border-right-color: #30B058;
+  }
+
+  .authContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f9fafb;
+    padding: 20px;
+  }
+  
+  .authCard {
+    width: 100%;
+    max-width: 500px;
+    padding: 32px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .authHeader {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  
+  .logo {
+    font-size: 28px;
+    font-weight: bold;
+    color: #30B058;
+    cursor: pointer;
+  }
+  
+  .title {
+    margin-top: 20px;
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .subtitle {
+    margin-top: 6px;
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .formRow {
+    display: flex;
+    gap: 16px;
+  }
+  
+  .formGroup {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .label {
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #4b5563;
+  }
+  
+  .input {
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    transition: border-color 0.2s ease;
+  }
+  
+  .input:focus {
+    outline: none;
+    border-color: #30B058;
+    box-shadow: 0 0 0 2px rgba(48, 176, 88, 0.2);
+  }
+  
+  .formOptions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .checkboxGroup {
+    display: flex;
+    align-items: center;
+  }
+  
+  .checkbox {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    accent-color: #30B058;
+  }
+  
+  .checkboxLabel {
+    font-size: 14px;
+    color: #4b5563;
+  }
+  
+  .forgotPassword {
+    font-size: 14px;
+  }
+  
+  .button {
+    margin-top: 12px;
+    padding: 10px 16px;
+    background-color: #30B058;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .button:hover {
+    background-color: #249b4a;
+  }
+  
+  .button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(48, 176, 88, 0.4);
+  }
+  
+  .authFooter {
+    margin-top: 24px;
+    text-align: center;
+    font-size: 14px;
+    color: #4b5563;
+  }
+  
+  .link {
+    color: #30B058;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+  
+  .link:hover {
+    color: #249b4a;
+    text-decoration: underline;
+  }
