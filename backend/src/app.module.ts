@@ -27,18 +27,27 @@ import { Cours } from './Cours/cours.entity';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type : 'postgres',
-      host : 'localhost',
-      port : 5432,
-      username :'postgres',
-      password :'PostgreSQLPwd13',
-      database : 'gestion_emploi_temps',
-      entities : [Utilisateur, Etudiant, Enseignant,
-                  Disponibilite, Matiere, Mention, 
-                  Parcours, Niveau, Classe, Salle, Cours] ,
+      type: 'postgres',
+      host: 'localhost',
+      port: 5432,
+      username: 'postgres',
+      password: 'postgres',
+      database: 'gestion-emploi-temps',
+      entities: [
+        Utilisateur,
+        Etudiant,
+        Enseignant,
+        Disponibilite,
+        Matiere,
+        Mention,
+        Parcours,
+        Niveau,
+        Classe,
+        Salle,
+        Cours,
+      ],
       synchronize: false,
       migrations: ['src/Migrations/*.ts'],
-
     }),
     AuthModule,
     MentionModule,
@@ -51,7 +60,7 @@ import { Cours } from './Cours/cours.entity';
     ClasseModule,
     CoursModule,
     SalleModule,
-    DisponibiliteModule
-  ]
+    DisponibiliteModule,
+  ],
 })
 export class AppModule {}

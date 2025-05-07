@@ -1,36 +1,40 @@
-import { Classe } from "src/Classe/classe.entity";
-import { Matiere } from "src/Matiere/matiere.entity";
-import { Salle } from "src/Salle/salle.entity";
-import { Column, Entity, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Classe } from '../Classe/classe.entity';
+import { Matiere } from '../Matiere/matiere.entity';
+import { Salle } from '../Salle/salle.entity';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryColumn,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
-export class Cours{
-    @PrimaryColumn()
-    id_parcours: number;
+export class Cours {
+  @PrimaryColumn()
+  id_parcours: number;
 
-    @PrimaryColumn()
-    id_niveau: string;
+  @PrimaryColumn()
+  id_niveau: string;
 
-    @PrimaryGeneratedColumn()
-    id_matiere : number;
+  @PrimaryGeneratedColumn()
+  id_matiere: number;
 
-    @PrimaryColumn()
-    id_salle: string;
-    
-    @ManyToOne(()=>Classe, (classe)=> classe.cours)
-    classe :Classe;
+  @PrimaryColumn()
+  id_salle: string;
 
-    @ManyToOne(()=>Salle, (salle)=> salle.cours)
-    salle :Salle;
+  @ManyToOne(() => Classe, (classe) => classe.cours)
+  classe: Classe;
 
-    @ManyToOne(()=>Matiere, (matiere)=> matiere.cours)
-    matiere :Classe;
+  @ManyToOne(() => Salle, (salle) => salle.cours)
+  salle: Salle;
 
-    @Column({type:'timestamp'})
-    cours_debut : Date;
+  @ManyToOne(() => Matiere, (matiere) => matiere.cours)
+  matiere: Classe;
 
-    @Column({type:'timestamp'})
-    cours_fin : Date;
+  @Column({ type: 'timestamp' })
+  cours_debut: Date;
 
-
+  @Column({ type: 'timestamp' })
+  cours_fin: Date;
 }

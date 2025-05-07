@@ -1,9 +1,9 @@
-import { Module } from "@nestjs/common";
-import { ParcoursController } from "./parcours.controller";
-import { ParcoursService } from "./parcours.service";
+import { Module } from '@nestjs/common';
+import { ParcoursController } from './parcours.controller';
+import { ParcoursService } from './parcours.service';
 
 @Module({
-    controllers :[ParcoursController],
-    providers :[ParcoursService]
+  controllers: [ParcoursController],
+  providers: [ParcoursService],
 })
-export class ParcoursModule{}
+export class ParcoursModule {}

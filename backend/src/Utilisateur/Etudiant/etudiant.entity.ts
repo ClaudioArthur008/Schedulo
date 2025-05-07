@@ -1,15 +1,15 @@
-import { Entity, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryColumnCannotBeNullableError } from "typeorm";
-import { Utilisateur } from "../utilisateur.entity";
-import { Classe } from "src/Classe/classe.entity";
+import { Entity, ManyToOne, OneToOne, PrimaryColumn } from 'typeorm';
+import { Utilisateur } from '../utilisateur.entity';
+import { Classe } from '../../Classe/classe.entity';
 
 @Entity()
-export class Etudiant{
-    @PrimaryColumn()
-    matricule : number
+export class Etudiant {
+  @PrimaryColumn()
+  matricule: string;
 
-    @OneToOne(()=>Utilisateur, (utilisateur)=>utilisateur.etudiant)
-    utilisateur: Utilisateur
+  @OneToOne(() => Utilisateur, (utilisateur) => utilisateur.etudiant)
+  utilisateur: Utilisateur;
 
-    @ManyToOne(()=>Classe, (classe)=>classe.etudiant)
-    classe :Classe;
+  @ManyToOne(() => Classe, (classe) => classe.etudiant)
+  classe: Classe;
 }
