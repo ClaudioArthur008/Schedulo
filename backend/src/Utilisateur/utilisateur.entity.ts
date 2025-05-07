@@ -1,47 +1,39 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { Enseignant } from './Enseignant/enseignant.entity';
-import { Etudiant } from './Etudiant/etudiant.entity';
+import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Enseignant } from "./Enseignant/enseignant.entity";
+import { Etudiant } from "./Etudiant/etudiant.entity";
+import { Notification } from "../Notification/notification.entity";
+
+export enum Role {
+    ETUDIANT = 'etudiant',
+    ENSEIGNANT = 'enseignant',
+    ADMIN = 'admin'
+}
 
 @Entity()
 export class Utilisateur {
-  @PrimaryGeneratedColumn()
-  id_utilisateur: number;
+    @PrimaryGeneratedColumn()
+    id_utilisateur: number;
 
-  @Column()
-  email: string;
+    @Column({unique: true})
+    email: string;
 
-  @Column()
-  nom: string;
+    @Column()
+    mot_passe: string;
 
-  @Column()
-  prenom: string;
+    @Column()
+    role: Role;
 
-  @Column()
-  mot_passe: string;
+    @Column({default: false})
+    approuve: boolean;
 
-  @Column()
-  role: Role;
+    @OneToOne(() => Enseignant, {nullable: true})
+    @JoinColumn()
+    enseignant?: Enseignant;
 
-  @Column()
-  approuve: boolean;
+    @OneToOne(() => Etudiant, {nullable: true})
+    @JoinColumn()
+    etudiant?: Etudiant;
 
-  @OneToOne(() => Enseignant, (enseignant) => enseignant.utilisateur)
-  @JoinColumn()
-  enseignant?: Enseignant;
-
-  @OneToOne(() => Etudiant, (etudiant) => etudiant.utilisateur)
-  @JoinColumn()
-  etudiant?: Etudiant;
-}
-
-enum Role {
-  ETUDIANT = 'etudiant',
-  ENSEIGNANT = 'enseignant',
-  ADMIN = 'admin',
+    @OneToMany(() => Notification, notification => notification.utilisateur)
+    notifications: Notification[];
 }

@@ -1,19 +1,21 @@
-import { Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Utilisateur } from '../utilisateur.entity';
-import { Disponibilite } from '../../Disponibilite/disponibilite.entity';
-import { Matiere } from '../../Matiere/matiere.entity';
+import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Matiere } from "../../Matiere/matiere.entity";
+import { Disponibilite } from "../../Disponibilite/disponibilite.entity";
 
 @Entity()
-export class Enseignant {
-  @PrimaryGeneratedColumn()
-  id_enseignant: number;
+export class Enseignant{
+    @PrimaryGeneratedColumn()
+    id_enseignant : number;
 
-  @OneToOne(() => Utilisateur, (utilisateur) => utilisateur.enseignant)
-  utilisateur: Enseignant;
+    @Column()
+    nom: string;
 
-  @OneToMany(() => Disponibilite, (disponibilite) => disponibilite.enseignant)
-  disponibilite: Disponibilite[];
+    @Column({unique: true})
+    prenom :string;
 
-  @OneToMany(() => Matiere, (matiere) => matiere.enseignant)
-  matiere: Matiere[];
+    @OneToMany(()=>Disponibilite, (disponibilite)=>disponibilite.enseignant)
+    disponibilite : Disponibilite[];
+
+    @OneToMany(()=>Matiere , (matiere)=>matiere.enseignant)
+    matiere : Matiere[];
 }

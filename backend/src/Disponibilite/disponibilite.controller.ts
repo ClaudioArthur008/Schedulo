@@ -1,58 +1,40 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Post,
-  Put,
-  UseGuards,
-  Request,
-} from '@nestjs/common';
-import { DisponibiliteService } from './disponibilite.service';
-import { Disponibilite } from './disponibilite.entity';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { Roles } from '../auth/decorator/public.decorator';
+import { Body, Controller, Delete, Get, Param, Post, Put } from "@nestjs/common";
+import { DisponibiliteService } from "./disponibilite.service";
+import { Disponibilite } from "./disponibilite.entity";
 
 @Controller('disponibilite')
-export class DisponibiliteController {
-  constructor(private disponibiliteService: DisponibiliteService) {}
+export class DisponibiliteController{
+    constructor(private disponibiliteService : DisponibiliteService){}
 
-  @UseGuards(JwtAuthGuard)
-  @Roles('enseignant')
-  @Post('create')
-  create(@Request() req: { user: { userId: number } }, @Body() body) {
-    const user = req.user;
-    return this.disponibiliteService.create({
-      ...body,
-      enseignant: { id_utilisateur: user.userId },
-    });
-  }
+    @Get()
+    async getAllDisponibility() {
+        return this.disponibiliteService.findAll();
+    }
+    
+    @Get('this-week/:id_enseignant')
+    async getDisponibilityThisWeek(@Param('id_enseignant') id_enseignant: number) {
+        return this.disponibiliteService.findDisponibilityThisWeek(id_enseignant);
+    }
 
-  @Get('this-week/:id_enseignant')
-  async getDisponibilityThisWeek(id_enseignant: number) {
-    return this.disponibiliteService.findDisponibilityThisWeek(id_enseignant);
-  }
+    @Get('specific-week/:id_enseignant')
+    async getDisponibilityforSpecificWeek(@Param('id_enseignant')id_enseignant: number,@Body('date') date: string) {
+        return this.disponibiliteService.findDisponibilityforSpecificWeek(id_enseignant, date);
+    }
 
-  @Get('specific-week/:id_enseignant/:date')
-  async getDisponibilityforSpecificWeek(id_enseignant: number, date: Date) {
-    return this.disponibiliteService.findDisponibilityforSpecificWeek(
-      id_enseignant,
-      date,
-    );
-  }
+    @Post()
+    async createDisponibility( @Body() disponibilite: Disponibilite) {
+        return this.disponibiliteService.create(disponibilite);
+    }
 
-  @Post('create')
-  async createDisponibility(@Body() disponibilite: Disponibilite) {
-    return this.disponibiliteService.create(disponibilite);
-  }
+    @Put(':id')
+    async updateDisponibility(@Param('id') id: number,@Body() disponibilite: Disponibilite) {
+        return this.disponibiliteService.update(id, disponibilite);
+    }
 
-  @Put('update/:id')
-  async updateDisponibility(id: number, disponibilite: Disponibilite) {
-    return this.disponibiliteService.update(id, disponibilite);
-  }
+    @Delete(':id')
+    async deleteDisponibility(@Param('id')id: number) {
+        return this.disponibiliteService.delete(id);
+    }
 
-  @Delete('delete/:id')
-  async deleteDisponibility(id: number) {
-    return this.disponibiliteService.delete(id);
-  }
+    
 }

@@ -1,40 +1,42 @@
-import { Classe } from '../Classe/classe.entity';
-import { Matiere } from '../Matiere/matiere.entity';
-import { Salle } from '../Salle/salle.entity';
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  PrimaryColumn,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Matiere_Classe } from "../Matiere_Classe/matiere_classe.entity";
+import { Salle } from "../Salle/salle.entity";
+import { Column, Entity, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export class Cours {
-  @PrimaryColumn()
-  id_parcours: number;
+export class Cours{
+    @PrimaryGeneratedColumn()
+    id_cours: number;
 
-  @PrimaryColumn()
-  id_niveau: string;
+    @Column({type:'timestamp'})
+    cours_debut : Date;
 
-  @PrimaryGeneratedColumn()
-  id_matiere: number;
+    @Column({type:'timestamp'})
+    cours_fin : Date;
 
-  @PrimaryColumn()
-  id_salle: string;
+    @Column({default:0})
+    status :Status;
 
-  @ManyToOne(() => Classe, (classe) => classe.cours)
-  classe: Classe;
+    @Column({ unique: true })
+    qrCodeToken: string;
 
-  @ManyToOne(() => Salle, (salle) => salle.cours)
-  salle: Salle;
+    @ManyToOne(()=>Matiere_Classe, (matiere_classe)=> matiere_classe.cours)
+    matiere_classes :Matiere_Classe;
 
-  @ManyToOne(() => Matiere, (matiere) => matiere.cours)
-  matiere: Classe;
+    @ManyToOne(()=>Salle, (salle)=> salle.cours)
+    salle :Salle;
 
-  @Column({ type: 'timestamp' })
-  cours_debut: Date;
+}
 
-  @Column({ type: 'timestamp' })
-  cours_fin: Date;
+export class CoursDTO{
+    cours_debut : Date;
+    cours_fin : Date;
+    status :Status;
+    qrCodeToken: string;
+}
+
+enum Status {
+    PLANIFIER=0,
+    EN_COURS =1,
+    TERMINE =2,
+    ANNULE =3, 
 }
