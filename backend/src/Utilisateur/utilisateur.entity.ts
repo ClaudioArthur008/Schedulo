@@ -2,25 +2,27 @@ import {
   Column,
   Entity,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Enseignant } from './Enseignant/enseignant.entity';
 import { Etudiant } from './Etudiant/etudiant.entity';
+import { Notification } from '../Notification/notification.entity';
+
+export enum Role {
+  ETUDIANT = 'etudiant',
+  ENSEIGNANT = 'enseignant',
+  ADMIN = 'admin',
+}
 
 @Entity()
 export class Utilisateur {
   @PrimaryGeneratedColumn()
   id_utilisateur: number;
 
-  @Column()
+  @Column({ unique: true })
   email: string;
-
-  @Column()
-  nom: string;
-
-  @Column()
-  prenom: string;
 
   @Column()
   mot_passe: string;
@@ -28,20 +30,17 @@ export class Utilisateur {
   @Column()
   role: Role;
 
-  @Column()
+  @Column({ default: false })
   approuve: boolean;
 
-  @OneToOne(() => Enseignant, (enseignant) => enseignant.utilisateur)
+  @OneToOne(() => Enseignant, { nullable: true })
   @JoinColumn()
   enseignant?: Enseignant;
 
-  @OneToOne(() => Etudiant, (etudiant) => etudiant.utilisateur)
+  @OneToOne(() => Etudiant, { nullable: true })
   @JoinColumn()
   etudiant?: Etudiant;
-}
 
-enum Role {
-  ETUDIANT = 'etudiant',
-  ENSEIGNANT = 'enseignant',
-  ADMIN = 'admin',
+  @OneToMany(() => Notification, (notification) => notification.utilisateur)
+  notifications: Notification[];
 }

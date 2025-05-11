@@ -1,13 +1,5 @@
-import { Cours } from '../Cours/cours.entity';
-import { Enseignant } from '../Utilisateur/Enseignant/enseignant.entity';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Matiere_Classe } from '../Matiere_Classe/matiere_classe.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Matiere {
@@ -17,10 +9,6 @@ export class Matiere {
   @Column()
   nom_matiere: string;
 
-  @ManyToOne(() => Enseignant, (enseignant) => enseignant.matiere)
-  @JoinColumn()
-  enseignant: Enseignant;
-
-  @OneToMany(() => Cours, (cours) => cours.matiere)
-  cours: Cours[];
+  @OneToMany(() => Matiere_Classe, (matiere_classe) => matiere_classe.matiere)
+  matiere_classes: Matiere_Classe[];
 }

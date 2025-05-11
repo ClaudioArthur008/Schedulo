@@ -17,6 +17,7 @@ export class Disponibilite {
 
   @Column({ type: 'timestamp' })
   dispo_fin: Date;
+
   @ManyToOne(() => Enseignant, (enseignant) => enseignant.disponibilite)
   @JoinColumn()
   enseignant: Enseignant;

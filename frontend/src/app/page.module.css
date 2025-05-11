@@ -485,3 +485,8 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Forms  */
+.authContent {
+  display: flex;
+}

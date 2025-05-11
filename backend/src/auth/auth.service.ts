@@ -15,10 +15,34 @@ export class AuthService {
 
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.userRepo.findOne({ where: { email } });
-    if (user && (await bcrypt.compare(password, user.mot_passe))) {
+
+    // Vérifier si l'utilisateur existe avant de tenter de comparer les mots de passe
+    if (!user) {
+      throw new UnauthorizedException('Email ou mot de passe invalide');
+    }
+
+    // Vérifier si le mot de passe est défini
+    if (!user.mot_passe) {
+      throw new UnauthorizedException(
+        "Erreur avec les informations d'authentification",
+      );
+    }
+
+    // Vérifier si l'utilisateur est approuvé
+    if (!user.approuve) {
+      throw new UnauthorizedException(
+        `Votre compte n'a pas encore été approuvé par un administrateur.`,
+      );
+    }
+
+    // Maintenant on peut comparer en toute sécurité
+    const isPasswordValid = await bcrypt.compare(password, user.mot_passe);
+
+    if (isPasswordValid) {
       const { mot_passe, ...result } = user;
       return result;
     }
+
     throw new UnauthorizedException('Email ou mot de passe invalide');
   }
 
@@ -27,8 +51,6 @@ export class AuthService {
     user: {
       id: number;
       email: string;
-      prenom: string;
-      nom: string;
       role: string;
     };
   } {
@@ -38,8 +60,6 @@ export class AuthService {
       user: {
         id: user.id_utilisateur,
         email: user.email,
-        prenom: user.prenom,
-        nom: user.nom,
         role: user.role,
       },
     };
