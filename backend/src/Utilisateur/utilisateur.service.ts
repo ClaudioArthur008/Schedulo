@@ -4,6 +4,7 @@ import { Utilisateur } from './utilisateur.entity';
 import { Repository } from 'typeorm';
 import { Enseignant } from './Enseignant/enseignant.entity';
 import { Etudiant } from './Etudiant/etudiant.entity';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UtilisateurService {
@@ -19,8 +20,9 @@ export class UtilisateurService {
   }
 
   async findOne(id: number): Promise<Utilisateur> {
-    const utilisateur = await this.utilisateurRepository.findOneBy({
-      id_utilisateur: id,
+    const utilisateur = await this.utilisateurRepository.findOne({
+      where: { id_utilisateur: id },
+      relations: ['enseignant', 'etudiant'],
     });
     if (!utilisateur) {
       throw new Error(`L'utilisateur avec l'identifiant : ${id} n'existe pas`);
@@ -28,11 +30,26 @@ export class UtilisateurService {
     return utilisateur;
   }
 
-  async create(user: Partial<Utilisateur>): Promise<Utilisateur> {
+  async create(user: Utilisateur): Promise<Utilisateur> {
+    if (!user.etudiant?.matricule && !user.enseignant?.id_enseignant) {
+      throw new Error(
+        "L'utilisateur doit être soit un étudiant soit un enseignant",
+      );
+    }
+
+    // Hashage du mot de passe
+    const salt = await bcrypt.genSalt(10);
+    const hash: string = await bcrypt.hash(user.mot_passe, salt);
+    user.mot_passe = hash;
     return this.utilisateurRepository.save(user);
   }
 
   async update(id: number, user: Partial<Utilisateur>): Promise<Utilisateur> {
+    if (!user.etudiant?.matricule && !user.enseignant?.id_enseignant) {
+      throw new Error(
+        "L'utilisateur doit être soit un étudiant soit un enseignant",
+      );
+    }
     await this.utilisateurRepository.update(id, user);
     const utilisateur = await this.utilisateurRepository.findOne({
       where: { id_utilisateur: id },

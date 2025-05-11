@@ -33,8 +33,8 @@ export default new DataSource({
     Matiere_Classe,
     Niveau,
     Cours,
-    Notification
+    Notification,
   ],
   migrations: [__dirname + '/Migrations/*{.ts,.js}'],
-    synchronize: false,
+  synchronize: false,
 });

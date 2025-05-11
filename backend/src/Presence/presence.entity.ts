@@ -1,6 +1,6 @@
-import { Cours } from "../Cours/cours.entity";
-import { Etudiant } from "../Utilisateur/Etudiant/etudiant.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Cours } from '../Cours/cours.entity';
+import { Etudiant } from '../Utilisateur/Etudiant/etudiant.entity';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Presence {
@@ -18,10 +18,9 @@ export class Presence {
 }
 
 export class PresenceDto {
-    etudiantId: string;
-    id_cours: number;
-    token: string;
-    latitude: number;
-    longitude: number;
-  }
-  
+  etudiantId: string;
+  id_cours: number;
+  token: string;
+  latitude: number;
+  longitude: number;
+}

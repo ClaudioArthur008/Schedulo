@@ -9,7 +9,9 @@ import {
 } from '@nestjs/common';
 import { UtilisateurService } from './utilisateur.service';
 import { Utilisateur } from './utilisateur.entity';
+import { Public } from './../auth/decorator/public.decorator';
 
+@Public()
 @Controller('utilisateur')
 export class UtilisateurController {
   constructor(private utilisateurService: UtilisateurService) {}
@@ -25,9 +27,7 @@ export class UtilisateurController {
   }
 
   @Post()
-  async create(
-    @Body() utilisateur: Partial<Utilisateur>,
-  ): Promise<Utilisateur> {
+  async create(@Body() utilisateur: Utilisateur): Promise<Utilisateur> {
     return this.utilisateurService.create(utilisateur);
   }
 
@@ -36,7 +36,7 @@ export class UtilisateurController {
     return this.utilisateurService.remove(id);
   }
 
-  @Put(':id/approve')
+  @Put('approve/:id')
   async approveUtilisateur(@Param('id') id: number): Promise<Utilisateur> {
     return this.utilisateurService.approved(id);
   }
