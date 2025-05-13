@@ -31,13 +31,15 @@ export class UtilisateurController {
     return this.utilisateurService.create(utilisateur);
   }
 
+   @Put('approve/:id')
+  async approveUtilisateur(@Param('id') id: number): Promise<Utilisateur> {
+    return this.utilisateurService.approved(id);
+  }
+
   @Delete(':id')
   async deleteUtilisateur(@Param('id') id: number): Promise<void> {
     return this.utilisateurService.remove(id);
   }
 
-  @Put('approve/:id')
-  async approveUtilisateur(@Param('id') id: number): Promise<Utilisateur> {
-    return this.utilisateurService.approved(id);
-  }
+ 
 }

@@ -33,6 +33,7 @@
   font-size: 14px;
   background-color: white;
   font-family: "Poppins";
+  color: black;
 }
 
 .exportButton {
@@ -106,6 +107,7 @@
 .timeSlot:hover {
   background-color: #f0f0f0;
 }
+
 
 .timeSlot.available {
   background-color: #e8f5e9;

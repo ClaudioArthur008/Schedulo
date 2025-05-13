@@ -4,7 +4,7 @@ import Link from 'next/link';
 import styles from './Auth.module.css';
 import Image from 'next/image';
 import { Eye, EyeOff } from 'lucide-react';
-import axios from 'axios';
+import api from '@/api/api';
 
 export default function SignupForm() {
     const [formData, setFormData] = useState({
@@ -198,7 +198,7 @@ export default function SignupForm() {
 
             console.log('Formulaire soumis avec succès :', userData);
 
-            axios.post('http://localhost:3002/utilisateur', userData)
+            api.post('/utilisateur', userData)
                 .then((response) => {
                     console.log('Utilisateur créé avec succès :', response.data);
                     // Rediriger ou afficher un message de succès

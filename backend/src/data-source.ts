@@ -19,8 +19,8 @@ export const AppDataSource = new DataSource({
   host: 'localhost',
   port: 5432,
   username: 'postgres',
-  password: 'postgres',
-  database: 'gestion-emploi-temps',
+  password: 'PostgreSQLPwd13',
+  database: 'gestion_emploi_temps',
   entities: [
     Utilisateur,
     Etudiant,

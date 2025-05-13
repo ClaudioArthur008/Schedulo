@@ -41,14 +41,14 @@
   min-height: 100vh;
 }
 
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   .page {
     --gray-100: rgba(255, 255, 255, 0.06);
     --gray-200: rgba(255, 255, 255, 0.145);
     color: var(--text-light);
     background-color: var(--bg-dark);
   }
-}
+} */
 
 /* Header & Navigation */
 .header {
@@ -73,11 +73,11 @@
   backdrop-filter: blur(5px);
 }
 
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   .header {
     background-color: var(--bg-dark);
   }
-}
+} */
 
 .logo h1 {
   font-size: 1.8rem;
@@ -254,12 +254,12 @@
   transform: translateY(-2px);
 }
 
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   .secondary {
     background-color: var(--bg-dark);
     color: var(--text-light);
   }
-}
+} */
 
 /* Features Section */
 .features {

@@ -22,7 +22,7 @@ export class UtilisateurService {
   async findOne(id: number): Promise<Utilisateur> {
     const utilisateur = await this.utilisateurRepository.findOne({
       where: { id_utilisateur: id },
-      relations: ['enseignant', 'etudiant'],
+      relations: ['enseignant', 'etudiant', 'etudiant.classe'],
     });
     if (!utilisateur) {
       throw new Error(`L'utilisateur avec l'identifiant : ${id} n'existe pas`);

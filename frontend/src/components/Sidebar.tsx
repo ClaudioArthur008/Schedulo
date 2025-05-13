@@ -1,15 +1,43 @@
 import { BarChart2, BookOpen, Clock, LogOut, Sliders, Users } from "lucide-react";
 import styles from '../app/enseignant/enseignant.module.css';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from "react";
+import { UserInfo } from "@/interface/Type";
+import api from '@/api/api';
 
 export const Sidebar = ({ activePage, setActivePage }: { activePage: string; setActivePage: (page: string) => void }) => {
     const router = useRouter();
+    const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+
+    useEffect(() => {
+        const userJson = sessionStorage.getItem("user");
+        const user = userJson ? JSON.parse(userJson) : null;
+        const userId = user?.id;
+
+        if (userId) {
+            api.get(`/utilisateur/${userId}`)
+                .then(response => {
+                    setUserInfo(response.data);
+                })
+                .catch(error => {
+                    console.error("Erreur lors de la récupération des données utilisateur :", error);
+                });
+        }
+    }, []);
+    
     const menuItems = [
         { name: "Tableau de bord", icon: <BarChart2 className={styles.menuIcon} /> },
         { name: "Disponibilités", icon: <Clock className={styles.menuIcon} /> },
         { name: "Cours", icon: <BookOpen className={styles.menuIcon} /> },
         { name: "Étudiants", icon: <Users className={styles.menuIcon} /> },
         { name: "Paramètres", icon: <Sliders className={styles.menuIcon} /> }
+    ];
+
+    const etudiantMenuItems = [
+        { name: "Accueil", icon: <BarChart2 className={styles.menuIcon} /> },
+        { name: "Cours", icon: <BookOpen className={styles.menuIcon} /> },
+        { name: "Presence", icon: <BookOpen className={styles.menuIcon} /> },
+
     ];
 
     const handleLogout = () => {
@@ -29,16 +57,30 @@ export const Sidebar = ({ activePage, setActivePage }: { activePage: string; set
     return (
         <aside className={styles.sidebar}>
             <div className={styles.menuItems}>
-                {menuItems.map((item) => (
-                    <div
-                        key={item.name}
-                        className={`${styles.menuItem} ${activePage === item.name ? styles.activeMenuItem : ''}`}
-                        onClick={() => setActivePage(item.name)}
-                    >
-                        {item.icon}
-                        <span>{item.name}</span>
-                    </div>
-                ))}
+                {userInfo?.enseignant?.id_enseignant ? (
+                    menuItems.map((item) => (
+                        <div
+                            key={item.name}
+                            className={`${styles.menuItem} ${activePage === item.name ? styles.activeMenuItem : ''}`}
+                            onClick={() => setActivePage(item.name)}
+                        >
+                            {item.icon}
+                            <span>{item.name}</span>
+                        </div>
+                    ))
+                ) : (
+                    etudiantMenuItems.map((item) => (
+                        <div
+                            key={item.name}
+                            className={`${styles.menuItem} ${activePage === item.name ? styles.activeMenuItem : ''}`}
+                            onClick={() => setActivePage(item.name)}
+                        >
+                            {item.icon}
+                            <span>{item.name}</span>
+                        </div>
+                    ))
+                )}
+                
             </div>
             <div className={styles.logoutContainer}>
                 <button className={styles.logoutButton} onClick={handleLogout}>

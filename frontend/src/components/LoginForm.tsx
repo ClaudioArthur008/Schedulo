@@ -5,6 +5,7 @@ import styles from './Auth.module.css';
 import Image from 'next/image';
 import { Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import api from '@/api/api';
 import axios from 'axios';
 
 export default function LoginForm() {
@@ -125,7 +126,8 @@ export default function LoginForm() {
 
         if (validateForm()) {
             try {
-                const response = await axios.post('http://localhost:3002/auth/login', formData);
+                // const response = await api.post('/auth/login', formData);
+                const response = await api.post('/auth/login', formData);
                 console.log('Utilisateur connecté avec succès :', response.data);
 
                 // Stocker le token dans localStorage ou sessionStorage selon l'option "Se souvenir de moi"
@@ -326,7 +328,7 @@ export default function LoginForm() {
                         <div className={styles.authFooter}>
                             <p>
                                 Première connexion?{' '}
-                                <Link href="/signup" className={styles.link}>
+                                <Link href="/register" className={styles.link}>
                                     Créer un compte
                                 </Link>
                             </p>
