@@ -22,16 +22,16 @@ export class EtudiantService {
     return etudiant;
   }
 
-  async create(etudiant: Partial<Etudiant>): Promise<Etudiant> {
+  async create(etudiant:Etudiant): Promise<Etudiant> {
     if (!etudiant.matricule) {
       throw new Error("Le matricule de l'étudiant est requis");
     }
-    const existingEtudiant = await this.findOne(etudiant.matricule);
-    if (existingEtudiant) {
-      throw new Error(
-        `L'étudiant avec le matricule ${etudiant.matricule} existe déjà`,
-      );
-    }
+    // const existingEtudiant = await this.findOne(etudiant.matricule);
+    // if (existingEtudiant) {
+    //   throw new Error(
+    //     `L'étudiant avec le matricule ${etudiant.matricule} existe déjà`,
+    //   );
+    // }
     return this.etudiantRepository.save(etudiant);
   }
 

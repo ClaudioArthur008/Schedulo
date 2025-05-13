@@ -32,7 +32,7 @@ export class DisponibiliteController {
   @Get('specific-week/:id_enseignant')
   async getDisponibilityforSpecificWeek(
     @Param('id_enseignant') id_enseignant: number,
-    @Query('date') date: string,
+    @Body('date') date: string,
   ) {
     return this.disponibiliteService.findDisponibilityforSpecificWeek(
       id_enseignant,

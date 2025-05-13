@@ -3,8 +3,9 @@ import { BellRing, ChevronDown } from "lucide-react";
 import styles from '../app/enseignant/enseignant.module.css';
 import axios from "axios";
 import { UserInfo } from "@/interface/Type";
+import api from "@/api/api";
 
-// Composant pour la navbar
+
 export const Navbar = () => {
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
@@ -14,7 +15,7 @@ export const Navbar = () => {
         const userId = user?.id;
 
         if (userId) {
-            axios.get(`http://localhost:3002/utilisateur/${userId}`)
+            api.get(`/utilisateur/${userId}`)
                 .then(response => {
                     setUserInfo(response.data);
                 })
@@ -36,13 +37,22 @@ export const Navbar = () => {
                 <BellRing className={styles.bellIcon} />
                 <div className={styles.userInfo}>
                     <div className={styles.userAvatar}>
+                        {userInfo?.enseignant?.id_enseignant? (
                         <span>
                             {userInfo ? ((userInfo.enseignant?.prenom?.[0] ?? "") + (userInfo.enseignant?.nom?.[0] ?? "")) : "Chargement..."}
-                        </span>
+                        </span>) : (
+                        <span>
+                            {userInfo ? ((userInfo.etudiant?.prenom?.[0] ?? "") + (userInfo.etudiant?.nom?.[0] ?? "")) : "Chargement..."}
+                        </span>)}
                     </div>
-                    <span>
-                        {userInfo ? `${userInfo.enseignant?.prenom} ${userInfo.enseignant?.nom}` : "Chargement..."}
-                    </span>
+                    {userInfo?.enseignant?.id_enseignant? (
+                        <span>
+                            {userInfo ? ((userInfo.enseignant?.prenom ?? "") + (userInfo.enseignant?.nom?.[0] ?? "")) : "Chargement..."}
+                        </span>) : (
+                        <span>
+                            {userInfo ? ((userInfo.etudiant?.prenom ?? "") + (userInfo.etudiant?.nom?.[0] ?? "")) : "Chargement..."}
+                        </span>)
+                    }
                     <ChevronDown className={styles.chevronIcon} />
                 </div>
             </div>

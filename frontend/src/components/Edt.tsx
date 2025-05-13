@@ -16,7 +16,7 @@ interface WeekData {
   dates: string;
 }
 
-const DisponibiliteProfesseur = () => {
+const Edt = () => {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [disponibilite, setDisponibilitesPerWeek] = useState<DisponibiliteItem | null>(null);
   const [sentDisponibilites, setSentDisponibilites] = useState<DisponibiliteItem[]>([]);
@@ -361,4 +361,4 @@ const DisponibiliteProfesseur = () => {
   );
 };
 
-export default DisponibiliteProfesseur;
+export default Edt;
