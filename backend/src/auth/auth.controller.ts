@@ -5,6 +5,7 @@ import { Public } from './decorator/public.decorator';
 export class LoginDto {
   email: string;
   password: string;
+  role: string;
 }
 
 @Public()
@@ -14,7 +15,11 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() dto: LoginDto) {
-    const user = await this.authService.validateUser(dto.email, dto.password);
+    const user = await this.authService.validateUser(
+      dto.email,
+      dto.password,
+      dto.role,
+    );
     return this.authService.login(user);
   }
 }

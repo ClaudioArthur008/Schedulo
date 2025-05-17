@@ -13,11 +13,6 @@ export class MatiereController {
     return this.matiereService.getAllMatiere();
   }
 
-  @Get('enseignantmatiere/:id_enseignant')
-  async getMatiereforEnseignant(@Param('id_enseignant') id_enseignant: number) {
-    return this.matiereService.getMatiereforEnseignant(id_enseignant);
-  }
-
   @Post()
   async createMatiere(@Body() matiere: Matiere) {
     return this.matiereService.createMatiere(matiere);

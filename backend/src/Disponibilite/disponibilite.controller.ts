@@ -40,6 +40,13 @@ export class DisponibiliteController {
     );
   }
 
+  @Get('week/:id_enseignant')
+  async getDisponibilitesPerWeek(
+    @Param('id_enseignant') id_enseignant: string,
+  ) {
+    return this.disponibiliteService.getDisponibilitesPerWeek(id_enseignant);
+  }
+
   @Post()
   async createDisponibility(@Body() disponibilite: Disponibilite) {
     return this.disponibiliteService.create(disponibilite);
@@ -56,5 +63,10 @@ export class DisponibiliteController {
   @Delete(':id')
   async deleteDisponibility(@Param('id') id: number) {
     return this.disponibiliteService.delete(id);
+  }
+
+  @Delete()
+  async deleteAllDisponibility() {
+    return this.disponibiliteService.clearAll();
   }
 }

@@ -38,12 +38,4 @@ export class MatiereService {
     }
     await this.matiereRepository.delete(id);
   }
-
-  async getMatiereforEnseignant(id_enseignant: number): Promise<Matiere[]> {
-    return this.matiereRepository
-      .createQueryBuilder('matiere')
-      .innerJoinAndSelect('matiere.enseignant', 'enseignant')
-      .where('enseignant.id_enseignant = :id_enseignant', { id_enseignant })
-      .getMany();
-  }
 }

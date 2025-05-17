@@ -7,6 +7,9 @@ import { CourseProps } from "@/interface/cours";
 import { Navbar } from "@/components/Navbar";
 import DisponibiliteProfesseur from "@/components/Disponibilite";
 import { useRouter } from "next/navigation";
+import axios from "axios";
+import { UserInfo } from "@/interface/Type";
+import { error } from "console";
 
 // StatCard Component
 const StatCard = ({ title, value, icon, color }: { title: string; value: string; icon: JSX.Element; color: string }) => {
@@ -27,20 +30,81 @@ const StatCard = ({ title, value, icon, color }: { title: string; value: string;
 
 // Dashboard Component
 const Dashboard = () => {
+    type Matiere_Classe = {
+        id_mc: number;
+        matiereidmatiere: string;
+        classeidparcours: string;
+        classeidniveau: string;
+        classegroupe: string;
+        enseignantidenseignant: string;
+        matiere: {
+            id_matiere: number;
+            nom_matiere: string;
+        };
+        classe: {
+            id_parcours: number;
+            id_niveau: number;
+            groupe: string;
+            nom_parcours: string;
+            nom_niveau: string;
+        };
+    };
+
+    const [matiereClasse, setMatiereClasse] = useState<Matiere_Classe[]>([]);
+    const [etudiantMatiere, setEtudiantMatiere] = useState<Matiere_Classe[]>([]);
+    const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+
+    useEffect(() => {
+        const userJson = sessionStorage.getItem("user");
+        const user = userJson ? JSON.parse(userJson) : null;
+        const idEnseignant = user?.id;
+
+        if (idEnseignant) {
+            axios.get(`http://localhost:3002/utilisateur/${idEnseignant}`)
+                .then(response => {
+                    setUserInfo(response.data);
+
+                    // Une fois userInfo défini, effectuer la deuxième requête
+                    const id = response.data?.enseignant?.id_enseignant;
+                    if (id) {
+                        // Récupérer les matières de l'enseignant
+                        axios.get(`http://localhost:3002/matiere_classe/enseignant/${id}`)
+                            .then(response => {
+                                setMatiereClasse(response.data);
+                            })
+                            .catch(error => {
+                                console.error("Erreur lors de la récupération :", error);
+                            });
+                        // Récuperer les étudiants liés au cours de l'enseignant
+                        axios.get(`http://localhost:3002/matiere_classe/etudiant/${id}`)
+                            .then(response => {
+                                setEtudiantMatiere(response.data);
+                            })
+                            .catch(error => {
+                                console.error("Erreur lors de la récupération des étudiants de l'étudiant :", error);
+                            });
+                    }
+                })
+                .catch(error => {
+                    console.error("Erreur lors de la récupération des données utilisateur :", error);
+                });
+        }
+    }, []);
+
     return (
         <div className={styles.dashboardContainer}>
             <h1 className={styles.pageTitle}>Tableau de bord</h1>
 
             <div className={styles.statsGrid}>
                 <StatCard
-                    title="Total de cours"
-                    value="24"
+                    title="Total de matières"
+                    value={matiereClasse.length.toString()}
                     icon={<BookOpen className={styles.statIconSvg} />}
                     color="#6366f1"
                 />
                 <StatCard
                     title="Étudiants"
-                    value="142"
+                    value={etudiantMatiere.length.toString()}
                     icon={<Users className={styles.statIconSvg} />}
                     color="#4ade80"
                 />

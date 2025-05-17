@@ -26,6 +26,22 @@ export class MatiereClasseController {
     return await this.matiere_classeService.getOne(id);
   }
 
+  @Get('enseignant/:id_enseignant')
+  async getByEnseignant(
+    @Param('id_enseignant') id_enseignant: string,
+  ): Promise<Matiere_Classe[]> {
+    return await this.matiere_classeService.getMatiereforEnseignant(
+      id_enseignant,
+    );
+  }
+
+  @Get('etudiant/:id_enseignant')
+  async getByEtudiant(
+    @Param('id_enseignant') id_enseignant: string,
+  ): Promise<Matiere_Classe[]> {
+    return await this.matiere_classeService.getEtudiantMatiere(id_enseignant);
+  }
+
   @Post()
   async create(@Body() data: Matiere_Classe): Promise<Matiere_Classe> {
     return await this.matiere_classeService.create(data);

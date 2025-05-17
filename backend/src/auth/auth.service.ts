@@ -13,7 +13,11 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<any> {
+  async validateUser(
+    email: string,
+    password: string,
+    role: string,
+  ): Promise<any> {
     const user = await this.userRepo.findOne({ where: { email } });
 
     // Vérifier si l'utilisateur existe avant de tenter de comparer les mots de passe
@@ -25,6 +29,13 @@ export class AuthService {
     if (!user.mot_passe) {
       throw new UnauthorizedException(
         "Erreur avec les informations d'authentification",
+      );
+    }
+
+    // Vérifier si le rôle correspond
+    if (user.role !== (role as typeof user.role)) {
+      throw new UnauthorizedException(
+        `Vous n'avez pas le droit d'accéder à cette ressource.`,
       );
     }
 
