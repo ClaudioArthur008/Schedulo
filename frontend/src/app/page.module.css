@@ -1,29 +1,29 @@
 .page {
   /* Couleurs primaires - gamme de verts */
-  --primary-color: #26a554;    
-  --primary-dark: #1e8744;     
-  --primary-light: #e6f7ed;   
-  
+  --primary-color: #26a554;
+  --primary-dark: #1e8744;
+  --primary-light: #e6f7ed;
+
   /* Couleurs d'accent */
-  --accent-color: #ff6b4a;      
-  --accent-light: #fff0ed;   
-  
+  --accent-color: #ff6b4a;
+  --accent-light: #fff0ed;
+
   /* Textes */
-  --text-dark: #1a1a1a;        
-  --text-light: #ffffff;       
-  --text-gray: #6b7280;      
-  --text-green: #156e3a;       
-  
+  --text-dark: #1a1a1a;
+  --text-light: #ffffff;
+  --text-gray: #6b7280;
+  --text-green: #156e3a;
+
   /* Arrière-plans */
-  --bg-light: #ffffff;         
-  --bg-off-white: #f9faf5;     
-  --bg-dark: #121212;         
-  
+  --bg-light: #ffffff;
+  --bg-off-white: #f9faf5;
+  --bg-dark: #121212;
+
   /* Éléments neutres */
   --gray-100: rgba(0, 0, 0, 0.05);
   --gray-200: rgba(0, 0, 0, 0.08);
   --gray-300: rgba(0, 0, 0, 0.12);
-  
+
   /* Éléments d'interface */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -33,7 +33,7 @@
   --radius-full: 9999px;
 
   /* Police et styles de base */
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   color: var(--text-dark);
   background-color: var(--bg-light);
   margin: 0;
@@ -104,7 +104,7 @@
 }
 
 .navLink:hover:after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -5px;
   left: 0;
@@ -274,7 +274,7 @@
 }
 
 .sectionTitle:after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -10px;
   left: 50%;
@@ -430,11 +430,11 @@
   .hero {
     flex-direction: column;
   }
-  
+
   .heroTitle {
     font-size: 2.5rem;
   }
-  
+
   .heroSubtitle {
     max-width: 100%;
   }
@@ -445,26 +445,28 @@
     flex-direction: column;
     padding: 1rem;
   }
-  
-  .navCenter, .navRight {
+
+  .navCenter,
+  .navRight {
     margin-top: 1rem;
     width: 100%;
     justify-content: center;
   }
-  
+
   .navCenter {
     gap: 1rem;
   }
-  
+
   .heroTitle {
     font-size: 2rem;
   }
-  
+
   .ctas {
     flex-direction: column;
   }
-  
-  .featureGrid, .testimonialGrid {
+
+  .featureGrid,
+  .testimonialGrid {
     grid-template-columns: 1fr;
   }
 }
@@ -475,12 +477,12 @@
     align-items: center;
     gap: 0.5rem;
   }
-  
+
   .navRight {
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .footerContent {
     grid-template-columns: 1fr;
   }

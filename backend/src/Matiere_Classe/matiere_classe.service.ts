@@ -63,4 +63,29 @@ export class MatiereClasseService {
   async remove(id: number): Promise<void> {
     await this.matiere_classeRepository.delete(id);
   }
+
+  async getMatiereforEnseignant(
+    id_enseignant: string,
+  ): Promise<Matiere_Classe[]> {
+    return this.matiere_classeRepository
+      .createQueryBuilder('matiere_classe')
+      .innerJoinAndSelect('matiere_classe.enseignant', 'enseignant')
+      .where('enseignant.id_enseignant = :id_enseignant', { id_enseignant })
+      .getMany();
+  }
+
+  async getEtudiantMatiere(id_enseignant: string): Promise<Matiere_Classe[]> {
+    return await this.matiere_classeRepository
+      .createQueryBuilder('matiere_classe')
+      .innerJoin('matiere_classe.enseignant', 'enseignant')
+      .innerJoin('matiere_classe.classe', 'classe')
+      .innerJoin(
+        'etudiant',
+        'etudiant',
+        'etudiant.classeIdParcours = classe.id_parcours AND etudiant.classeIdNiveau = classe.id_niveau AND etudiant.classeGroupe = classe.groupe',
+      )
+      .where('enseignant.id_enseignant = :id_enseignant', { id_enseignant })
+      .select('*')
+      .getRawMany();
+  }
 }

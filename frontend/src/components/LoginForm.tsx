@@ -11,6 +11,7 @@ export default function LoginForm() {
     const [formData, setFormData] = useState({
         email: '',
         password: '',
+        role: 'etudiant',
     });
     const [userType, setUserType] = useState('etudiant');
     const [touched, setTouched] = useState({
@@ -37,6 +38,13 @@ export default function LoginForm() {
 
         setFormValid(isValid);
     }, [formData, errors]);
+
+    useEffect(() => {
+        setFormData((prev) => ({
+            ...prev,
+            role: userType,
+        }));
+    }, [userType]);
 
     // Gestion des changements dans les champs
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -322,16 +330,14 @@ export default function LoginForm() {
                         </button>
                     </form>
 
-                    {userType === 'enseignant' && (
-                        <div className={styles.authFooter}>
-                            <p>
-                                Première connexion?{' '}
-                                <Link href="/signup" className={styles.link}>
-                                    Créer un compte
-                                </Link>
-                            </p>
-                        </div>
-                    )}
+                    <div className={styles.authFooter}>
+                        <p>
+                            Première connexion?{' '}
+                            <Link href="/register" className={styles.link}>
+                                Créer un compte
+                            </Link>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
