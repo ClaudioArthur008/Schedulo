@@ -20,7 +20,7 @@ type Matiere = {
 }
 
 type Classe = {
-    id_pacrours: number;
+    id_parcours: number;
     id_niveau: string;
     groupe: number;
 
@@ -47,6 +47,6 @@ export type Cours = {
     cours_fin: Date;
     status: number;
     qrCodeToken: string;
-    matiere_classe: Matiere_classe;
+    matiere_classes: Matiere_classe;
     salle: Salle;
 }

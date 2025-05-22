@@ -112,7 +112,7 @@ export default function CoursPage() {
                                                 ? `${classe.id_niveau} ${classe.parcours.code_parcours} ${classe.groupe}`
                                                 : "Classe inconnue";
 
-                                            const enseignant = c.matiere_classe?.enseignant;
+                                            const enseignant = c.matiere_classes?.enseignant;
                                             const enseignantStr = enseignant
                                                 ? `${enseignant.prenom} ${enseignant.nom}`
                                                 : "Enseignant inconnu";
