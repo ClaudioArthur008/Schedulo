@@ -1,0 +1,264 @@
+.passwordContainer .input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.passwordContainer {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  font-family: "Poppins";
+  justify-content: center;
+  display: flex;
+}
+
+.buttonDisabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.errorMessage {
+  color: #e53e3e;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.userTypeSelector {
+  display: flex;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  border: 1px solid #e5e7eb;
+}
+
+.button {
+  font-family: "Poppins";
+}
+
+.userTypeButton {
+  flex: 1;
+  padding: 12px;
+  background-color: #f9fafb;
+  font-family: "Poppins";
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.userTypeButton.active {
+  background-color: #30b058;
+  color: white;
+}
+
+.userTypeButton:not(.active):hover {
+  background-color: #e5e7eb;
+}
+
+/* Modification pour s'assurer que les boutons sont bien ajustés */
+.userTypeButton:first-child {
+  border-right: 1px solid #e5e7eb;
+}
+
+.userTypeButton.active:first-child {
+  border-right-color: #30b058;
+}
+
+.authContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 1rem;
+  background-color: #f5f5f5;
+}
+
+.authCard {
+  display: flex;
+  width: 100%;
+  max-width: 1200px;
+  min-height: 600px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.imageSchool,
+.authContent {
+  flex: 1; /* Fait que chaque div prend exactement 50% de l'espace */
+  display: flex;
+  flex-direction: column;
+}
+
+.authHeader {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.authContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo {
+  font-size: 28px;
+  font-weight: bold;
+  color: #30b058;
+  cursor: pointer;
+}
+
+.title {
+  margin-top: 20px;
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+}
+
+.subtitle {
+  margin-top: 6px;
+  font-size: 14px;
+  color: #666;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.imageSchool {
+  width: 300px;
+  height: 200px;
+  overflow: hidden;
+}
+
+.passwordToggle {
+  border: none;
+  background: transparent;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 70%;
+}
+
+.formRow {
+  display: flex;
+  gap: 16px;
+}
+
+.formGroup {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.input {
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  transition: border-color 0.2s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #30b058;
+  box-shadow: 0 0 0 2px rgba(48, 176, 88, 0.2);
+}
+
+.input::placeholder {
+  color: #9ca3af;
+  font-family: "Poppins", sans-serif;
+}
+
+.formOptions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.checkboxGroup {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  accent-color: #30b058;
+}
+
+.checkboxLabel {
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.forgotPassword {
+  font-size: 14px;
+}
+
+.button {
+  margin-top: 12px;
+  padding: 10px 16px;
+  background-color: #30b058;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.button:hover {
+  background-color: #249b4a;
+}
+
+.button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(48, 176, 88, 0.4);
+}
+
+.authFooter {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.link {
+  color: #30b058;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.link:hover {
+  color: #249b4a;
+  text-decoration: underline;
+}

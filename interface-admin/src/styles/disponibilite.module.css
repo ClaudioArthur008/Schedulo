@@ -1,0 +1,300 @@
+/* disponibilite.module.css */
+.disponibiliteProfesseur {
+  width: 100%;
+  margin: 0 auto;
+  font-family: "Poppins";
+  padding: 20px;
+  border-radius: 8px;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 24px;
+  margin: 0;
+}
+
+.message {
+  text-align: center;
+  font-size: 16px;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+}
+
+.weekSelect {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
+  font-family: "Poppins";
+}
+
+.exportButton {
+  padding: 8px 16px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-family: "Poppins";
+}
+
+.exportButton:hover {
+  background-color: #45a049;
+}
+
+.scheduleHeader {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.scheduleTitle {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.instructions {
+  color: #666;
+  font-size: 14px;
+  margin-top: 20px;
+}
+
+.weekTableWrapper {
+  margin-top: 10px;
+}
+
+.filterControls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.select-wrapper {
+  position: relative;
+  width: 220px;
+  font-family: Arial, sans-serif;
+}
+
+.weekSelect {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 100%;
+  padding: 10px 40px 10px 12px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  color: #333;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.select-wrapper::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 7px solid #666;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.weekSelect:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+}
+
+.timeTable {
+  width: 100%;
+  border-collapse: collapse;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-size: 14px;
+}
+
+.sentSection {
+  margin-top: 10px;
+  padding-top: 10px;
+}
+
+.message {
+  text-align: center;
+  font-size: 16px;
+  margin-top: 20px;
+}
+
+.timeTable th,
+.timeTable td {
+  border: 1px solid #ccc;
+}
+
+.hourHeader {
+  background-color: #f5f5f5;
+  padding: 10px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.dayCell {
+  background-color: #f5f5f5;
+  width: 40px;
+  text-align: center;
+  font-weight: bold;
+  padding: 10px 5px;
+}
+
+.timeSlot {
+  height: 100px;
+  background-color: #fff;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.timeSlot:hover {
+  background-color: #f0f0f0;
+}
+
+.timeSlot.available {
+  background-color: #e8f5e9;
+  position: relative;
+}
+
+.timeSlot.available:hover {
+  background-color: #c8e6c9;
+}
+
+.availableIndicator {
+  color: #43a047;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.legend {
+  display: flex;
+  margin-top: 15px;
+  gap: 20px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legendColor {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+}
+
+.legendColor.available {
+  background-color: #e8f5e9;
+}
+
+.instructions p {
+  margin: 5px 0;
+}
+
+/* Style pour ajouter des informations supplémentaires (optionnel) */
+.courseInfo {
+  font-size: 12px;
+  color: #555;
+  margin-top: 5px;
+}
+
+/* Style pour un formulaire modal (optionnel) */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 500px;
+  max-width: 90%;
+}
+
+.modalTitle {
+  font-size: 18px;
+  margin-bottom: 15px;
+}
+
+.formGroup {
+  margin-bottom: 15px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.formGroup input,
+.formGroup select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.buttonGroup {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.buttonGroup button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.saveButton {
+  background-color: #4caf50;
+  color: white;
+}
+
+.cancelButton {
+  background-color: #f5f5f5;
+  color: #333;
+}
