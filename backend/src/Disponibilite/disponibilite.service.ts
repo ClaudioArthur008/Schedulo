@@ -14,6 +14,33 @@ export class DisponibiliteService {
     return this.disponibiliteRepository.find();
   }
 
+  async getDisponibilitesPerWeek(idEnseignant: string) {
+    return this.disponibiliteRepository
+      .createQueryBuilder('d')
+      .select(`DATE_TRUNC('week', d.dispo_debut)::DATE`, 'debut_semaine')
+      .addSelect(
+        `(DATE_TRUNC('week', d.dispo_debut) + INTERVAL '6 days')::DATE`,
+        'fin_semaine',
+      )
+      .addSelect(
+        `
+    ARRAY_AGG(
+      json_build_object(
+        'id_disponibilite', d.id_disponibilite,
+        'dispo_debut', d.dispo_debut,
+        'dispo_fin', d.dispo_fin
+      )
+    )
+    `,
+        'disponibilites',
+      )
+      .where(`d."enseignantIdEnseignant" = :id`, { id: idEnseignant })
+      .groupBy(`DATE_TRUNC('week', d.dispo_debut)`)
+      .addGroupBy(`(DATE_TRUNC('week', d.dispo_debut) + INTERVAL '6 days')`)
+      .orderBy('debut_semaine', 'ASC')
+      .getRawMany();
+  }
+
   async findDisponibilityThisWeek(
     id_enseignant: number,
   ): Promise<Disponibilite[]> {
@@ -110,5 +137,9 @@ export class DisponibiliteService {
     if (result.affected === 0) {
       throw new Error(`Disponibilite with id ${id} not found`);
     }
+  }
+
+  async clearAll(): Promise<void> {
+    await this.disponibiliteRepository.clear();
   }
 }

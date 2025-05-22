@@ -21,6 +21,25 @@
   margin: 0;
 }
 
+.filterContainer {
+  margin-bottom: 20px;
+  margin-top: 10px;
+}
+
+.cardsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.sentCard {
+  transition: border 0.2s;
+}
+
+.message {
+  text-align: center;
+  font-size: 16px;
+}
+
 .controls {
   display: flex;
   gap: 10px;
@@ -67,11 +86,75 @@
   margin-top: 20px;
 }
 
+.weekTableWrapper {
+  margin-top: 10px;
+}
+
+.filterControls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.select-wrapper {
+  position: relative;
+  width: 220px;
+  font-family: Arial, sans-serif;
+}
+
+.weekSelect {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 100%;
+  padding: 10px 40px 10px 12px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  color: #333;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.select-wrapper::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 7px solid #666;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.weekSelect:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+}
+
 .timeTable {
   width: 100%;
   border-collapse: collapse;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   font-size: 14px;
+}
+
+.sentSection {
+  border-top: #ccc solid 1px;
+  margin-top: 10px;
+  padding-top: 10px;
+}
+
+.message {
+  text-align: center;
+  font-size: 16px;
+  margin-top: 20px;
 }
 
 .timeTable th,

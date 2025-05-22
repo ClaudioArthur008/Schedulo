@@ -6,11 +6,13 @@ import Image from 'next/image';
 import { Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import { message } from 'antd';
 
 export default function LoginForm() {
     const [formData, setFormData] = useState({
         email: '',
         password: '',
+        role: 'etudiant',
     });
     const [userType, setUserType] = useState('etudiant');
     const [touched, setTouched] = useState({
@@ -25,6 +27,8 @@ export default function LoginForm() {
     const [rememberMe, setRememberMe] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [messageApi, contextHolder] = message.useMessage();
+
 
     // Vérification de la validité globale du formulaire
     useEffect(() => {
@@ -37,6 +41,13 @@ export default function LoginForm() {
 
         setFormValid(isValid);
     }, [formData, errors]);
+
+    useEffect(() => {
+        setFormData((prev) => ({
+            ...prev,
+            role: userType,
+        }));
+    }, [userType]);
 
     // Gestion des changements dans les champs
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -134,46 +145,54 @@ export default function LoginForm() {
                     storage.setItem('token', response.data.access_token);
                     storage.setItem('user', JSON.stringify(response.data.user));
 
-                    // Redirection selon le rôle de l'utilisateur
-                    if (response.data.user && response.data.user.role) {
-                        switch (response.data.user.role) {
-                            case 'etudiant':
-                                router.push('/etudiant');
-                                break;
-                            case 'enseignant':
-                                router.push('/enseignant');
-                                break;
-                            default:
-                                router.push('/dashboard');
+                    // Afficher un message de succès
+                    messageApi.success('Connexion réussie !', 2);
+
+                    // Attendre 1 seconde avant de rediriger
+                    setTimeout(() => {
+                        if (response.data.user && response.data.user.role) {
+                            switch (response.data.user.role) {
+                                case 'etudiant':
+                                    router.push('/etudiant');
+                                    break;
+                                case 'enseignant':
+                                    router.push('/enseignant');
+                                    break;
+                                case 'admin':
+                                    router.push('/admin');
+                                    break;
+                                default:
+                                    router.push('/dashboard');
+                            }
+                        } else {
+                            router.push('/login');
                         }
-                    } else {
-                        router.push('/login');
-                    }
+                    }, 1000);
                 }
             } catch (error: any) {
                 console.error('Erreur de connexion:', error);
 
-                // Gestion des erreurs
+                // Gestion des erreurs avec message d'Ant Design
                 if (error.response) {
-                    const message = error.response.data.message;
+                    const messageText = error.response.data.message;
 
                     if (error.response.status === 401) {
-                        if (message === 'Votre compte n\'a pas encore été approuvé par un administrateur.') {
-                            setError(message);
-                        } else if (message === 'Erreur avec les informations d\'authentification') {
-                            setError('Erreur interne d’identification. Veuillez contacter un administrateur.');
+                        if (messageText === 'Votre compte n\'a pas encore été approuvé par un administrateur.') {
+                            messageApi.error(messageText, 5);
+                        } else if (messageText === 'Erreur avec les informations d\'authentification') {
+                            messageApi.error('Erreur interne d’identification. Veuillez contacter un administrateur.', 5);
                         } else {
-                            setError('Email ou mot de passe incorrect');
+                            messageApi.error('Email ou mot de passe incorrect', 5);
                         }
                     } else if (error.response.status === 500) {
-                        setError('Erreur serveur. Veuillez réessayer plus tard.');
+                        messageApi.error('Erreur serveur. Veuillez réessayer plus tard.', 5);
                     } else {
-                        setError(message || 'Erreur lors de la connexion');
+                        messageApi.error(messageText || 'Erreur lors de la connexion', 5);
                     }
                 } else if (error.request) {
-                    setError('Impossible de joindre le serveur. Vérifiez votre connexion.');
+                    messageApi.error('Impossible de joindre le serveur. Vérifiez votre connexion.', 5);
                 } else {
-                    setError('Erreur de connexion');
+                    messageApi.error('Erreur de connexion', 5);
                 }
 
             } finally {
@@ -194,146 +213,155 @@ export default function LoginForm() {
     };
 
     return (
-        <div className={styles.authContainer}>
-            <div className={styles.authCard}>
-                <div className="imageSchool">
-                    <Image src="/student.jpg" alt="School" className={styles.image} width={500} height={500} />
-                </div>
-                <div className={styles.authContent}>
-                    <div className={styles.authHeader}>
-                        <Link href="/">
-                            <span className={styles.logo}>Schedulo</span>
-                        </Link>
-                        <h2 className={styles.title}>Se connecter</h2>
-                        <p className={styles.subtitle}>Accédez à votre espace Schedulo</p>
+        <>
+            {contextHolder}
+            <div className={styles.authContainer}>
+                <div className={styles.authCard}>
+                    <div className="imageSchool">
+                        <Image src="/student.jpg" alt="School" className={styles.image} width={500} height={500} />
                     </div>
-
-                    <form className={styles.form} onSubmit={handleSubmit} noValidate>
-                        <div className={styles.userTypeSelector}>
-                            <button
-                                type="button"
-                                className={`${styles.userTypeButton} ${userType === 'etudiant' ? styles.active : ''}`}
-                                onClick={() => setUserType('etudiant')}
-                            >
-                                Etudiant
-                            </button>
-                            <button
-                                type="button"
-                                className={`${styles.userTypeButton} ${userType === 'enseignant' ? styles.active : ''}`}
-                                onClick={() => setUserType('enseignant')}
-                            >
-                                Enseignant
-                            </button>
+                    <div className={styles.authContent}>
+                        <div className={styles.authHeader}>
+                            <Link href="/">
+                                <span className={styles.logo}>Schedulo</span>
+                            </Link>
+                            <h2 className={styles.title}>Se connecter</h2>
+                            <p className={styles.subtitle}>Accédez à votre espace Schedulo</p>
                         </div>
 
-                        {/* Afficher les erreurs globales */}
-                        {error && (
-                            <div className={styles.globalError}>
-                                {error}
-                            </div>
-                        )}
-
-                        <div className={styles.formGroup}>
-                            <label htmlFor="email" className={styles.label}>
-                                Email
-                            </label>
-                            <input
-                                id="email"
-                                name="email"
-                                type="email"
-                                autoComplete="email"
-                                placeholder={userType === 'enseignant' ? "email@universite.fr" : "email@schedulo.fr"}
-                                value={formData.email}
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                className={`${styles.input} ${shouldShowError('email') ? styles.inputError : ''}`}
-                                aria-invalid={errors.email ? 'true' : 'false'}
-                                aria-describedby={errors.email ? 'email-error' : undefined}
-                            />
-                            {shouldShowError('email') && (
-                                <div id="email-error" className={styles.errorMessage}>
-                                    {errors.email}
-                                </div>
-                            )}
-                        </div>
-
-                        <div className={styles.formGroup}>
-                            <label htmlFor="password" className={styles.label}>
-                                Mot de passe
-                            </label>
-                            <div className={styles.passwordContainer}>
-                                <input
-                                    id="password"
-                                    name="password"
-                                    type={showPassword ? 'text' : 'password'}
-                                    autoComplete="current-password"
-                                    placeholder="Votre mot de passe"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    className={`${styles.input} ${shouldShowError('password') ? styles.inputError : ''}`}
-                                    aria-invalid={errors.password ? 'true' : 'false'}
-                                    aria-describedby={errors.password ? 'password-error' : undefined}
-                                />
+                        <form className={styles.form} onSubmit={handleSubmit} noValidate>
+                            <div className={styles.userTypeSelector}>
                                 <button
                                     type="button"
-                                    onClick={togglePasswordVisibility}
-                                    className={styles.passwordToggle}
-                                    aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                                    className={`${styles.userTypeButton} ${userType === 'etudiant' ? styles.active : ''}`}
+                                    onClick={() => setUserType('etudiant')}
                                 >
-                                    {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+                                    Etudiant
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`${styles.userTypeButton} ${userType === 'enseignant' ? styles.active : ''}`}
+                                    onClick={() => setUserType('enseignant')}
+                                >
+                                    Enseignant
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`${styles.userTypeButton} ${userType === 'admin' ? styles.active : ''}`}
+                                    onClick={() => setUserType('admin')}
+                                >
+                                    Administrateur
                                 </button>
                             </div>
-                            {shouldShowError('password') && (
-                                <div id="password-error" className={styles.errorMessage}>
-                                    {errors.password}
+
+                            {/* Afficher les erreurs globales */}
+                            {error && (
+                                <div className={styles.globalError}>
+                                    {error}
                                 </div>
                             )}
-                        </div>
 
-                        <div className={styles.formOptions}>
-                            <div className={styles.checkboxGroup}>
-                                <input
-                                    id="remember-me"
-                                    name="remember-me"
-                                    type="checkbox"
-                                    checked={rememberMe}
-                                    onChange={() => setRememberMe(!rememberMe)}
-                                    className={styles.checkbox}
-                                />
-                                <label htmlFor="remember-me" className={styles.checkboxLabel}>
-                                    Se souvenir de moi
+                            <div className={styles.formGroup}>
+                                <label htmlFor="email" className={styles.label}>
+                                    Email
                                 </label>
+                                <input
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    autoComplete="email"
+                                    placeholder={userType === 'enseignant' ? "email@universite.fr" : "email@schedulo.fr"}
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    className={`${styles.input} ${shouldShowError('email') ? styles.inputError : ''}`}
+                                    aria-invalid={errors.email ? 'true' : 'false'}
+                                    aria-describedby={errors.email ? 'email-error' : undefined}
+                                />
+                                {shouldShowError('email') && (
+                                    <div id="email-error" className={styles.errorMessage}>
+                                        {errors.email}
+                                    </div>
+                                )}
                             </div>
-                            <div className={styles.forgotPassword}>
-                                <Link href="/forgot-password" className={styles.link}>
-                                    Mot de passe oublié?
-                                </Link>
+
+                            <div className={styles.formGroup}>
+                                <label htmlFor="password" className={styles.label}>
+                                    Mot de passe
+                                </label>
+                                <div className={styles.passwordContainer}>
+                                    <input
+                                        id="password"
+                                        name="password"
+                                        type={showPassword ? 'text' : 'password'}
+                                        autoComplete="current-password"
+                                        placeholder="Votre mot de passe"
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        className={`${styles.input} ${shouldShowError('password') ? styles.inputError : ''}`}
+                                        aria-invalid={errors.password ? 'true' : 'false'}
+                                        aria-describedby={errors.password ? 'password-error' : undefined}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={togglePasswordVisibility}
+                                        className={styles.passwordToggle}
+                                        aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                                    >
+                                        {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+                                    </button>
+                                </div>
+                                {shouldShowError('password') && (
+                                    <div id="password-error" className={styles.errorMessage}>
+                                        {errors.password}
+                                    </div>
+                                )}
                             </div>
-                        </div>
 
-                        <button
-                            type="submit"
-                            className={`${styles.button} ${loading ? styles.buttonLoading : ''} ${!formValid ? styles.buttonDisabled : ''}`}
-                            disabled={loading || (formSubmitted && !formValid)}
-                        >
-                            {loading ? 'Connexion en cours...' :
-                                userType === 'enseignant' ? 'Accéder à mon emploi du temps' : 'Accéder à mon espace'}
-                        </button>
-                    </form>
+                            <div className={styles.formOptions}>
+                                <div className={styles.checkboxGroup}>
+                                    <input
+                                        id="remember-me"
+                                        name="remember-me"
+                                        type="checkbox"
+                                        checked={rememberMe}
+                                        onChange={() => setRememberMe(!rememberMe)}
+                                        className={styles.checkbox}
+                                    />
+                                    <label htmlFor="remember-me" className={styles.checkboxLabel}>
+                                        Se souvenir de moi
+                                    </label>
+                                </div>
+                                <div className={styles.forgotPassword}>
+                                    <Link href="/forgot-password" className={styles.link}>
+                                        Mot de passe oublié?
+                                    </Link>
+                                </div>
+                            </div>
 
-                    {userType === 'enseignant' && (
+                            <button
+                                type="submit"
+                                className={`${styles.button} ${loading ? styles.buttonLoading : ''} ${!formValid ? styles.buttonDisabled : ''}`}
+                                disabled={loading || (formSubmitted && !formValid)}
+                            >
+                                {loading ? 'Connexion...'
+                                    :
+                                    userType === 'enseignant' ? 'Accéder à mon emploi du temps' : 'Accéder à mon espace'}
+                            </button>
+                        </form>
+
                         <div className={styles.authFooter}>
                             <p>
                                 Première connexion?{' '}
-                                <Link href="/signup" className={styles.link}>
+                                <Link href="/register" className={styles.link}>
                                     Créer un compte
                                 </Link>
                             </p>
                         </div>
-                    )}
+                    </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 }

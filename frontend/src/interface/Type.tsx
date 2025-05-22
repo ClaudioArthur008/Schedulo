@@ -10,6 +10,28 @@ type Etudiant = {
     nom: string;
     prenom: string;
 };
+type Salle = {
+    id_salle: number;
+};
+
+type Matiere = {
+    id_matiere: number;
+    nom_matiere: string;
+}
+
+type Classe = {
+    id_parcours: number;
+    id_niveau: string;
+    groupe: number;
+
+};
+
+type Matiere_classe = {
+    id_mc: number;
+    matiere: Matiere;
+    classe: Classe;
+    enseignant: Enseignant;
+};
 
 export type UserInfo = {
     id_utilisateur: number;
@@ -18,3 +40,13 @@ export type UserInfo = {
     enseignant: Enseignant | null;
     etudiant: Etudiant | null;
 };
+
+export type Cours = {
+    id_cours: number;
+    cours_debut: Date;
+    cours_fin: Date;
+    status: number;
+    qrCodeToken: string;
+    matiere_classes: Matiere_classe;
+    salle: Salle;
+}

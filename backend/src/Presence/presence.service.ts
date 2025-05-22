@@ -18,8 +18,11 @@ export class PresenceService {
     @InjectRepository(Etudiant) private etudiantRepo: Repository<Etudiant>,
   ) {}
 
-  private readonly LAT = -21.455161785998023;
-  private readonly LON = 47.09337354447188;
+  // private readonly LAT = -21.455161785998023;
+  // private readonly LON = 47.09337354447188;
+
+  private readonly LAT = -21.460795969005932;
+  private readonly LON = 47.10578808449797;
   private readonly MAX_DISTANCE = 150;
 
   async getAllPresence(): Promise<Presence[]> {
