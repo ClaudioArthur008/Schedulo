@@ -21,6 +21,20 @@
   margin: 0;
 }
 
+.filterContainer {
+  margin-bottom: 20px;
+  margin-top: 10px;
+}
+
+.cardsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.sentCard {
+  transition: border 0.2s;
+}
+
 .message {
   text-align: center;
   font-size: 16px;

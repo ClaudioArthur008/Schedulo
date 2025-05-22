@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Utilisateur } from './utilisateur.entity';
+import { Role, Utilisateur } from './utilisateur.entity';
 import { Repository } from 'typeorm';
 import { Enseignant } from './Enseignant/enseignant.entity';
 import { Etudiant } from './Etudiant/etudiant.entity';
@@ -12,20 +12,36 @@ export class UtilisateurService {
     @InjectRepository(Utilisateur)
     @InjectRepository(Enseignant)
     @InjectRepository(Etudiant)
-    private utilisateurRepository: Repository<Utilisateur>,
+    public utilisateurRepository: Repository<Utilisateur>,
   ) {}
 
   async findAll(): Promise<Utilisateur[]> {
     return this.utilisateurRepository.find();
   }
 
+  async findByRole(role: Role): Promise<Utilisateur[]> {
+    return this.utilisateurRepository.find({ where: { role } });
+  }
+
   async findOne(id: number): Promise<Utilisateur> {
     const utilisateur = await this.utilisateurRepository.findOne({
       where: { id_utilisateur: id },
-      relations: ['enseignant', 'etudiant'],
+      relations: ['enseignant', 'etudiant', 'etudiant.classe'],
     });
     if (!utilisateur) {
       throw new Error(`L'utilisateur avec l'identifiant : ${id} n'existe pas`);
+    }
+    return utilisateur;
+  }
+
+  async findByEtudiant(id: string): Promise<Utilisateur[]> {
+    const utilisateur = await this.utilisateurRepository.find({
+      where: {
+        etudiant: { matricule: id },
+      },
+    });
+    if (!utilisateur) {
+      throw new Error(`L'utilisateur n'existe pas !`);
     }
     return utilisateur;
   }

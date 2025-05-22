@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import styles from "./disponibilite.module.css";
 import axios from "axios";
 import { UserInfo } from "@/interface/Type";
+import { Card } from "antd";
+import { Check, Info } from "lucide-react";
 
 interface DisponibiliteItem {
   day: string;
@@ -32,6 +34,7 @@ export default function DisponibiliteProfesseur() {
   const [availableWeeks, setAvailableWeeks] = useState<WeekData[]>([]);
   const [selectedWeek, setSelectedWeek] = useState<string>("");
   const [disponibilites, setDisponibilites] = useState<Map<string, DisponibiliteItem[]>>(new Map());
+  const [expandedCard, setExpandedCard] = useState<number | null>(null);
 
   useEffect(() => {
     const userJson = sessionStorage.getItem("user");
@@ -65,7 +68,7 @@ export default function DisponibiliteProfesseur() {
         id: `semaine${i + 1}`,
         label: `Semaine ${i + 1}`,
         dates: `du ${start.toLocaleDateString("fr-FR", options)} au ${end.toLocaleDateString("fr-FR", options)}`,
-        startDate: new Date(start) // Stocker la date de début réelle
+        startDate: new Date(start)
       });
     }
 
@@ -386,115 +389,99 @@ export default function DisponibiliteProfesseur() {
           </div>
         ) : (
           <>
-            <div className={styles.filterControls}>
-              <label htmlFor="weekFilter">Filtrer par semaine: </label>
+            <div className={styles.filterContainer}>
               <select
-                id="weekFilter"
                 value={selectedSentWeekFilter}
-                onChange={(e) => setSelectedSentWeekFilter(e.target.value)}
+                onChange={e => setSelectedSentWeekFilter(e.target.value)}
                 className={styles.weekSelect}
               >
                 <option value="all">Toutes les semaines</option>
-                {sentDisponibilites.map((weekData, i) => (
-                  <option key={i} value={i.toString()}>
-                    Semaine du {new Date(weekData.debut_semaine).toLocaleDateString("fr-FR")}
+                {sentDisponibilites.map((week, i) => (
+                  <option key={i} value={week.debut_semaine}>
+                    Semaine du {new Date(week.debut_semaine).toLocaleDateString("fr-FR")}
                   </option>
                 ))}
               </select>
             </div>
 
-            {selectedSentWeekFilter === "all"
-              ? sentDisponibilites.map((weekData, i) => (
-                <div key={i} className={styles.weekTableWrapper}>
-                  <h4>Semaine du {new Date(weekData.debut_semaine).toLocaleDateString("fr-FR")}</h4>
-                  <table className={styles.timeTable}>
-                    <thead>
-                      <tr>
-                        <th></th>
-                        {hours.map((hour) => (
-                          <th key={`${hour.start}-${hour.end}`} className={styles.hourHeader}>
-                            {hour.start}h - {hour.end}h
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {days.map((day) => (
-                        <tr key={day}>
-                          <td className={styles.dayCell}>{day}</td>
-                          {hours.map((hour) => {
-                            const available = weekData.disponibilites.some((d) => {
-                              const dispoDebut = new Date(d.dispo_debut);
-                              const dispoFin = new Date(d.dispo_fin);
-                              const dayName = dispoDebut.toLocaleDateString("fr-FR", { weekday: "short" });
-                              return dayName.toLowerCase().startsWith(day.toLowerCase()) &&
-                                dispoDebut.getHours() === hour.start &&
-                                dispoFin.getHours() === hour.end;
-                            });
-
-                            return (
-                              <td
-                                key={`${day}-${hour.start}`}
-                                className={`${styles.timeSlot} ${available ? styles.available : ""}`}
-                              >
-                                {available && <div className={styles.availableIndicator}>✔</div>}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ))
-              : (() => {
-                const weekIndex = parseInt(selectedSentWeekFilter);
-                const weekData = sentDisponibilites[weekIndex];
-                return (
-                  <div className={styles.weekTableWrapper}>
-                    <h4>Semaine du {new Date(weekData.debut_semaine).toLocaleDateString("fr-FR")}</h4>
-                    <table className={styles.timeTable}>
-                      <thead>
-                        <tr>
-                          <th></th>
-                          {hours.map((hour) => (
-                            <th key={`${hour.start}-${hour.end}`} className={styles.hourHeader}>
-                              {hour.start}h - {hour.end}h
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {days.map((day) => (
-                          <tr key={day}>
-                            <td className={styles.dayCell}>{day}</td>
-                            {hours.map((hour) => {
-                              const available = weekData.disponibilites.some((d) => {
-                                const dispoDebut = new Date(d.dispo_debut);
-                                const dispoFin = new Date(d.dispo_fin);
-                                const dayName = dispoDebut.toLocaleDateString("fr-FR", { weekday: "short" });
-                                return dayName.toLowerCase().startsWith(day.toLowerCase()) &&
-                                  dispoDebut.getHours() === hour.start &&
-                                  dispoFin.getHours() === hour.end;
-                              });
-
-                              return (
-                                <td
-                                  key={`${day}-${hour.start}`}
-                                  className={`${styles.timeSlot} ${available ? styles.available : ""}`}
-                                >
-                                  {available && <div className={styles.availableIndicator}>✔</div>}
-                                </td>
-                              );
-                            })}
+            <div className={styles.cardsContainer}>
+              {sentDisponibilites
+                .filter(week =>
+                  selectedSentWeekFilter === "all" ||
+                  week.debut_semaine === selectedSentWeekFilter
+                )
+                .map((weekData, i) => (
+                  <Card
+                    key={i}
+                    title={`Semaine du ${new Date(weekData.debut_semaine).toLocaleDateString("fr-FR")}`}
+                    hoverable
+                    className={styles.sentCard}
+                    onClick={() => setExpandedCard(expandedCard === i ? null : i)}
+                    headStyle={{
+                      background: "#fafafa",
+                      fontWeight: 600,
+                      fontSize: 16,
+                      borderBottom: "1px solid #e5e5e5"
+                    }}
+                    style={{
+                      marginBottom: 16,
+                      border: expandedCard === i ? "2px solid #26a554" : undefined,
+                      cursor: "pointer",
+                      fontFamily: 'Poppins',
+                    }}
+                  >
+                    {expandedCard === i ? (
+                      <table className={styles.timeTable}>
+                        <thead>
+                          <tr>
+                            <th></th>
+                            {hours.map((hour) => (
+                              <th key={`${hour.start}-${hour.end}`} className={styles.hourHeader}>
+                                {hour.start}h - {hour.end}h
+                              </th>
+                            ))}
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                );
-              })()
-            }
+                        </thead>
+                        <tbody>
+                          {days.map((day) => (
+                            <tr key={day}>
+                              <td className={styles.dayCell}>{day}</td>
+                              {hours.map((hour) => {
+                                const available = weekData.disponibilites.some((d) => {
+                                  const dispoDebut = new Date(d.dispo_debut);
+                                  const dispoFin = new Date(d.dispo_fin);
+                                  const dayName = dispoDebut.toLocaleDateString("fr-FR", { weekday: "short" });
+                                  return dayName.toLowerCase().startsWith(day.toLowerCase()) &&
+                                    dispoDebut.getHours() === hour.start &&
+                                    dispoFin.getHours() === hour.end;
+                                });
+
+                                return (
+                                  <td
+                                    key={`${day}-${hour.start}`}
+                                    className={`${styles.timeSlot} ${available ? styles.available : ""}`}
+                                  >
+                                    {available && <div className={styles.availableIndicator}><Check /></div>}
+                                  </td>
+                                );
+                              })}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <div>
+                        <span>
+                          {weekData.disponibilites.length} créneaux disponibles
+                        </span>
+                        <span style={{ float: "right", color: "#1677ff" }}>
+                          <Info size={20} />
+                        </span>
+                      </div>
+                    )}
+                  </Card>
+                ))}
+            </div>
           </>
         )}
       </div>

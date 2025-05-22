@@ -21,9 +21,31 @@ export class CoursController {
     return this.coursService.getAllCours();
   }
 
-  @Get('AllCoursThisWeek')
-  async getAllCoursThisWeek(): Promise<Cours[]> {
-    return this.coursService.getAllCoursThisWeek();
+  @Get('AllCoursThisWeek/:id_parcours/:id_niveau/:groupe')
+  async getAllCoursThisWeek(
+    @Param('id_parcours') id_parcours: number,
+    @Param('id_niveau') id_niveau: string,
+    @Param('groupe') groupe: string,
+  ): Promise<Cours[]> {
+    return this.coursService.getAllCoursThisWeek(
+      id_parcours,
+      id_niveau,
+      groupe,
+    );
+  }
+
+  @Get('AllCoursForEnseignant/:id_enseignant')
+  AllCoursForEnseignant(
+    @Param('id_enseignant') id_enseignant: string,
+  ): Promise<Cours[]> {
+    return this.coursService.AllCoursForEnseignant(id_enseignant);
+  }
+
+  @Get('AllCoursForEnseignantThisWeek/:id_enseignant')
+  async getCoursForEnseignantThisWeek(
+    @Param('id_enseignant') id_enseignant: string,
+  ): Promise<Cours[]> {
+    return this.coursService.getCoursForEnseignantThisWeek(id_enseignant);
   }
 
   @Get('AllCoursForSpecificWeek')
@@ -31,6 +53,19 @@ export class CoursController {
     @Body('date') date: string,
   ): Promise<Cours[]> {
     return this.coursService.getCoursForSpecificWeek(date);
+  }
+
+  @Get('currentTimeCours/:id_parcours/:id_niveau/:groupe')
+  async getCurrentTimeCours(
+    @Param('id_parcours') id_parcours: number,
+    @Param('id_niveau') id_niveau: string,
+    @Param('groupe') groupe: string,
+  ): Promise<any> {
+    return this.coursService.getCurrentTimeCours(
+      id_parcours,
+      id_niveau,
+      groupe,
+    );
   }
 
   @Post()

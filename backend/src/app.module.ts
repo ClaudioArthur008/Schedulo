@@ -27,6 +27,7 @@ import { Matiere_Classe } from './Matiere_Classe/matiere_classe.entity';
 import { MatiereClasseModule } from './Matiere_Classe/matiere_classe.module';
 import { NotificationModule } from './Notification/notification.module';
 import { Notification } from './Notification/notification.entity';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -85,6 +86,7 @@ import { Notification } from './Notification/notification.entity';
     DisponibiliteModule,
     MatiereClasseModule,
     NotificationModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}

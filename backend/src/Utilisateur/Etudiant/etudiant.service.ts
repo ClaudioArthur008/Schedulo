@@ -7,11 +7,28 @@ import { Repository } from 'typeorm';
 export class EtudiantService {
   constructor(
     @InjectRepository(Etudiant)
-    private etudiantRepository: Repository<Etudiant>,
+    public etudiantRepository: Repository<Etudiant>,
   ) {}
 
   async findAll(): Promise<Etudiant[]> {
     return this.etudiantRepository.find();
+  }
+
+  async findEtudiantsByClasseId(
+    parcours: number,
+    niveau: string,
+    groupe: number,
+  ): Promise<Etudiant[]> {
+    return this.etudiantRepository.find({
+      where: {
+        classe: {
+          id_parcours: parcours,
+          id_niveau: niveau,
+          groupe: groupe,
+        },
+      },
+      relations: ['classe'],
+    });
   }
 
   async findOne(id: string): Promise<Etudiant> {

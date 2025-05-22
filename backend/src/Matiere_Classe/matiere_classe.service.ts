@@ -70,6 +70,9 @@ export class MatiereClasseService {
     return this.matiere_classeRepository
       .createQueryBuilder('matiere_classe')
       .innerJoinAndSelect('matiere_classe.enseignant', 'enseignant')
+      .innerJoinAndSelect('matiere_classe.matiere', 'matiere')
+      .innerJoinAndSelect('matiere_classe.classe', 'classe')
+      .innerJoinAndSelect('classe.parcours', 'parcours')
       .where('enseignant.id_enseignant = :id_enseignant', { id_enseignant })
       .getMany();
   }

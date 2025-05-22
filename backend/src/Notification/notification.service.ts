@@ -7,7 +7,7 @@ import { Notification } from './notification.entity';
 export class NotificationService {
   constructor(
     @InjectRepository(Notification)
-    private notificationRepository: Repository<Notification>,
+    protected notificationRepository: Repository<Notification>,
   ) {}
 
   async getAll(): Promise<Notification[]> {
