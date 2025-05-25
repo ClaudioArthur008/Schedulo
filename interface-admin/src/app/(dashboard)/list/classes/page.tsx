@@ -199,7 +199,7 @@ const ClassesPage = () => {
                 <div className="flex items-center justify-between">
                     <h1 className="hidden md:block text-2xl font-semibold">Liste des Clases</h1>
                     <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-                        <TableSearch />
+                        <TableSearch placeholder="Recherche..."/>
                         <div className="flex items-center gap-4 self-end">
                             <button className="cursor-pointer w-8 h-8 flex items-center justify-center rounded-full bg-green-100">
                                 <Image src="/filter.png" alt="" width={14} height={14} />

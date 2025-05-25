@@ -139,7 +139,7 @@ export default function LoginForm() {
                     if (response.data.user && response.data.user.role) {
                         switch (response.data.user.role) {
                             case 'enseignant':
-                                router.push('/list/proffesseurs');
+                                router.push('/admin');
                                 break;
                             default:
                                 router.push('/dashboard');

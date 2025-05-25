@@ -1,12 +1,13 @@
 import api from "@/api/axios";
 import apilog from '@/api/api'
 import { Etudiant } from "./etudiant";
-import { Matiere } from "./matiere";
+import { Matiere, MatiereClasse } from "./matiere";
 
 export  interface Proffesseur {
-        id_enseignant: number;
+        id_enseignant: string;
         nom: string;
         prenom: string;
+         matiere_classe?: MatiereClasse[]
       }
 
 export interface User {
@@ -36,7 +37,7 @@ export const getUserInfo= (setUserInfo: (arg0: any) => void)=>{
             }
 }
 
-export const getUser = async (setData: (data: any) => void) => {
+export const getUser = async (setData: (data: User[]) => void) => {
     try {
         const response = await apilog.get(`/utilisateur`);
         setData(response.data);
@@ -56,21 +57,21 @@ export const addUser = async (user: User) => {
     }
 }
 
-export const approuveUser = async (userId: number) => {
+export const approuveUser = async (userId: number,  setData: (data: User[]) => void) => {
     try {
         const response = await apilog.put(`/utilisateur/approve/${userId}`);
-        return response.data;
+       await  getUser(setData)
     } catch (error) {
         console.error("Erreur lors de l'approbation de l'utilisateur :", error);
         throw error;
     }
 }
-export const deleteUser = async (userId: number) => {
+export const deleteUser = async (userId: number, setData: (data: User[]) => void) => {
     try {
         const response = await apilog.delete(`/utilisateur/${userId}`);
-        return response.data;
+        await getUser(setData)
     } catch (error) {
         console.error("Erreur lors de la suppression de l'utilisateur :", error);
         throw error;
-    }
+    } 
 }

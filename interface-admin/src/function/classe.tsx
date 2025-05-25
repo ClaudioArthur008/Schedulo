@@ -138,7 +138,7 @@ export const removeParcours = async (id: number, token:string)=>{
 }
 
 //classe
-export const getClasse = async (token:string) => {
+export const getClasse = async ( token: string) => {
     try {
         const response = await  api(token!).get("/classe");
         return response.data;

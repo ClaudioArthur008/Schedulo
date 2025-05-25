@@ -23,6 +23,16 @@ export interface MatiereClasse {
     enseignant : Proffesseur;
 }
 
+export interface newMc{
+    matiere:{id_matiere : number},
+    classe : {
+        id_parcours: number;
+        id_niveau: string;
+        groupe: number;
+    }
+    enseignant : {id_enseignant : string}
+}
+
 export const getMatiere = async ( token:string) => {
     try {
         const response = await  api(token!).get("/matiere");
@@ -84,8 +94,9 @@ export const getProfMatiere = async (setData: (data: any) => void, id : string) 
 
 
 
-export const addMatiereClasse = async (data: MatiereClasse, setData: (data: any) => void) => {
+export const addMatiereClasse = async (data: newMc, setData: (data: any) => void) => {
     try {
+        console.log(data)
         const response = await  apilog.post("/matiere_classe", data);
         getMatiereClasse(setData);
     } catch (error) {

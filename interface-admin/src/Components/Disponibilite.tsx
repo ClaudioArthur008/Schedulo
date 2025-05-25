@@ -3,8 +3,8 @@ import styles from "@/styles/disponibilite.module.css";
 import axios from "axios";
 import {UserInfo } from "@/interface/Type";
 import { Modal, Select } from "antd";
-import { getMatiereClasse, getProfMatiere, MatiereClasse } from "@/function/matiere";
-import { getSalles, getSallesAvalaible, Salle } from "@/function/salle";
+import {  getProfMatiere, MatiereClasse } from "@/function/matiere";
+import {  getSallesAvalaible, Salle } from "@/function/salle";
 import { formatDateTime } from "@/function/date";
 import Cours from "./Cours";
 import { addCours, CoursDTO } from "@/function/cours";
@@ -23,7 +23,11 @@ interface WeekData {
   startDate: Date;
 }
 
-export default function DisponibiliteProfesseur() {
+interface id_prof {
+  prof: string
+}
+
+export default function DisponibiliteProfesseur({ prof }: id_prof) {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [currentDisponibilites, setCurrentDisponibilites] = useState<DisponibiliteItem[]>([]);
   const [disponibilites, setDisponibilites] = useState<Map<string, DisponibiliteItem[]>>(new Map());
@@ -56,7 +60,7 @@ const [selectedDate, setSelectedDate] = useState<{ dateDebut: string; dateFin: s
       axios.get(`http://localhost:3002/utilisateur/${userId}`)
         .then(response => {
           setUserInfo(response.data);
-          getProfMatiere(setMatiereClasses, response.data.enseignant.id_enseignant);
+          getProfMatiere(setMatiereClasses, prof);
         })
         .catch(error => {
           console.error("Erreur lors de la récupération des données utilisateur :", error);
@@ -110,7 +114,7 @@ const [selectedDate, setSelectedDate] = useState<{ dateDebut: string; dateFin: s
   useEffect(() => {
     if (userInfo?.enseignant?.id_enseignant) {
       // Récupérer les disponibilités déjà envoyées
-      axios.get(`http://localhost:3002/disponibilite/week/${userInfo.enseignant.id_enseignant}`)
+      axios.get(`http://localhost:3002/disponibilite/week/${prof}`)
         .then(res => {
           const disponibilitesData = res.data;
           setSentDisponibilites(disponibilitesData);
@@ -162,7 +166,7 @@ const [selectedDate, setSelectedDate] = useState<{ dateDebut: string; dateFin: s
 
           // Charger également les disponibilités de la semaine en cours
           if (userInfo.enseignant && userInfo.enseignant.id_enseignant) {
-            axios.get(`http://localhost:3002/disponibilite/this-week/${userInfo.enseignant.id_enseignant}`)
+            axios.get(`http://localhost:3002/disponibilite/this-week/${prof}`)
               .then(res => {
                 setCurrentDisponibilites(res.data);
               })

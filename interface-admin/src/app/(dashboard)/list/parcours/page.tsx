@@ -88,7 +88,6 @@ const handleAddParcours = async () => {
         alert('Veuillez sélectionner une mention');
         return;
     }
-
     await addParcours(newParcours, token!)
   };
 

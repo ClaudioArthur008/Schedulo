@@ -2,7 +2,7 @@ import api from "@/api/axios";
 import apilog from '@/api/api'
 
  export interface Proffesseur {
-        id_enseignant: number;
+        id_enseignant: string;
         nom: string;
         prenom: string;
       }
@@ -28,7 +28,7 @@ export const add = async (data : Proffesseur, token :string) => {
     }
 }
 
-export const update = async (id: number, data: Proffesseur, token: string) => {
+export const update = async (id: string, data: Proffesseur, token: string) => {
     try {
         const response = await api(token!).put(`/Enseignant/${id}`, data);
         return response.data;
@@ -38,7 +38,7 @@ export const update = async (id: number, data: Proffesseur, token: string) => {
     }
 }
 
-export const remove = async (id: number,  token: string) => {
+export const remove = async (id: string,  token: string) => {
     try {
         const response = await  api(token!).delete(`/Enseignant/${id}`);
         return response.data;
