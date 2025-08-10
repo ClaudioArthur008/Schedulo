@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import styles from "@/styles/disponibilite.module.css";
 import axios from "axios";
-import {UserInfo } from "@/interface/Type";
+import { UserInfo } from "@/interface/Type";
 import { Modal, Select } from "antd";
 import {  getProfMatiere, MatiereClasse } from "@/function/matiere";
 import {  getSallesAvalaible, Salle } from "@/function/salle";
 import { formatDateTime } from "@/function/date";
-import Cours from "./Cours";
-import { addCours, CoursDTO } from "@/function/cours";
+import { addCours, Cours, CoursDTO, getCours } from "@/function/cours";
 
 interface DisponibiliteItem {
   day: string;
@@ -32,6 +31,7 @@ export default function DisponibiliteProfesseur({ prof }: id_prof) {
   const [currentDisponibilites, setCurrentDisponibilites] = useState<DisponibiliteItem[]>([]);
   const [disponibilites, setDisponibilites] = useState<Map<string, DisponibiliteItem[]>>(new Map());
   const [salle, setSalle] = useState<Salle[]>([]);
+  const [cours, setCours] = useState<Cours[]>([]);
   const [matiere_classes, setMatiereClasses] = useState<MatiereClasse[]>([]);
   const [sentDisponibilites, setSentDisponibilites] = useState<any[]>([]);
   const [selectedClasse, setSelectedClasse] = useState(null);
@@ -48,7 +48,7 @@ export default function DisponibiliteProfesseur({ prof }: id_prof) {
   const [availableWeeks, setAvailableWeeks] = useState<WeekData[]>([]);
   const [selectedWeek, setSelectedWeek] = useState<string>("");
   const[showModalAddCours, setShowModalAddCours] = useState(false);
-const [selectedDate, setSelectedDate] = useState<{ dateDebut: string; dateFin: string } | null>(null);
+  const [selectedDate, setSelectedDate] = useState<{ dateDebut: string; dateFin: string } | null>(null);
 
 
   useEffect(() => {
@@ -61,6 +61,7 @@ const [selectedDate, setSelectedDate] = useState<{ dateDebut: string; dateFin: s
         .then(response => {
           setUserInfo(response.data);
           getProfMatiere(setMatiereClasses, prof);
+          getCours(setCours);
         })
         .catch(error => {
           console.error("Erreur lors de la récupération des données utilisateur :", error);
@@ -216,6 +217,7 @@ const handleAdd = async () => {
           matiere_classes: selectedMc
         }
         await addCours(cours);
+        setShowModalAddCours(false);
     } else {
         console.warn("Aucune correspondance trouvée !");
     }
@@ -227,49 +229,61 @@ const handleAdd = async () => {
         {showModalAddCours && (
         <Modal
           onCancel={handleModalAdd} open={showModalAddCours} footer={null}>
-          <h1 className="text-2xl font-semibold">
-            Ajouter un enseignant cours
-        </h1>    
-        <br />                
-      <div className="flex flex-col gap-4">
-        <Select
-          placeholder="Classe"
-          className="w-full"
-          onChange={(value) => {
-            setSelectedClasse(value);
-            setSelectedMatiere(null);
-      }}
-        >
-        {classesUniques.map((classe) => (
+          <h1 className="text-2xl font-semibold py-4 border-b border-gray-500">
+             Ajouter un cours
+          </h1><br />               
+      <div  className=" space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Classe
+          </label>
+          <Select
+            placeholder="Classe"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg  "
+            onChange={(value) => {
+              setSelectedClasse(value);
+              setSelectedMatiere(null);
+            }}
+          >
+            {classesUniques.map((classe) => (
           <Select.Option
             key={`${classe.id_parcours}-${classe.id_niveau}-${classe.groupe}`}
             value={`${classe.id_parcours}-${classe.id_niveau}-${classe.groupe}`}
           >
             {`${classe.id_niveau} ${classe.parcours.code_parcours} gp${classe.groupe}`}
-          </Select.Option>
-        ))}
-
-        </Select>
-        <Select
-          placeholder="Matière"
-          className="w-full"
-          value={selectedMatiere}
-          onChange={(value) => setSelectedMatiere(value)}
-          disabled={!selectedClasse}
-        >
-          {filteredMatieres.map((mc) => (
-            <Select.Option
-              key={mc.matiere.id_matiere}
-              value={mc.matiere.id_matiere}
-            >
-              {mc.matiere.nom_matiere}
-            </Select.Option>
-          ))}
-        </Select> 
-        <Select
-          placeholder="Salles"
-          className="w-full"
-          onChange={(e)=>setSelectedSalle({...selectedSalle, id_salle : e })}
+              </Select.Option>
+            ))}
+          </Select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Matière
+          </label>
+          <Select
+            placeholder="Matière"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg  "
+            value={selectedMatiere}
+            onChange={(value) => setSelectedMatiere(value)}
+            disabled={!selectedClasse}
+          >
+            {filteredMatieres.map((mc) => (
+              <Select.Option
+                key={mc.matiere.id_matiere}
+                value={mc.matiere.id_matiere}
+              >
+                {mc.matiere.nom_matiere}
+              </Select.Option>
+            ))}
+          </Select> 
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Salle
+          </label>
+          <Select
+            placeholder="Salle"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg  "
+            onChange={(e)=>setSelectedSalle({...selectedSalle, id_salle : e })}
         >
           {salle.map((mc) => (
             <Select.Option
@@ -279,20 +293,23 @@ const handleAdd = async () => {
               {mc.id_salle}
             </Select.Option>
           ))}
-        </Select>              
+          </Select> 
+        </div>            
         <div className="flex justify-end gap-2 mt-4">
-            <button
-              className="text-red-500 bg-gray-200 px-4 py-2 rounded hover:bg-gray-300 cursor-pointer"
-            >
-               Annuler
-            </button>
-            <button
+          <button
               className="bg-green-500 hover:bg-green-600 cursor-pointer text-white py-2 px-4 rounded-md"
               onClick={async () => { handleAdd()
               }}
             >
               Ajouter
             </button>
+            <button
+            onClick={()=>{setShowModalAddCours(false)}}
+              className="border border-gray-200 text-gray-700 py-2 px-4  rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+            >
+               Annuler
+            </button>
+            
         </div>
       </div>
     </Modal>
@@ -340,26 +357,52 @@ const handleAdd = async () => {
                       {days.map((day) => (
                         <tr key={day}>
                           <td className={styles.dayCell}>{day}</td>
-                          {hours.map((hour) => {
-                            const matchedDispo = weekData.disponibilites.find((d: any) => {
-                              const dispoDebut = new Date(d.dispo_debut);
-                              const dispoFin = new Date(d.dispo_fin);
-                              const dayName = dispoDebut.toLocaleDateString("fr-FR", { weekday: "short" });
+                            {hours.map((hour) => {
+                              const matchedDispo = weekData.disponibilites.find((d: any) => {
+                                const dispoDebut = new Date(d.dispo_debut);
+                                const dispoFin = new Date(d.dispo_fin);
+                                const dayName = dispoDebut.toLocaleDateString("fr-FR", { weekday: "short" });
 
-                              return (
-                                dayName.toLowerCase().startsWith(day.toLowerCase()) &&
-                                dispoDebut.getHours() === hour.start &&
-                                dispoFin.getHours() === hour.end
-                              );
-                            });
+                                return (
+                                  dayName.toLowerCase().startsWith(day.toLowerCase()) &&
+                                  dispoDebut.getHours() === hour.start &&
+                                  dispoFin.getHours() === hour.end
+                                );
+                              });
 
-                            const available = !!matchedDispo;
+                              const weekStart = new Date(weekData.debut_semaine);
+                              const weekEnd = new Date(weekData.debut_semaine);
+                              weekEnd.setDate(weekEnd.getDate() + 6);
+                              const matchedCours = cours.find((c) => {
+                                const coursDebut = new Date(c.cours_debut);
+                                const coursFin = new Date(c.cours_fin);
+                                const dayName = coursDebut.toLocaleDateString("fr-FR", { weekday: "short" }).slice(0,2).toLowerCase();
+                                const dayShort = day.slice(0,2).toLowerCase();
+
+                                return (
+                                  coursDebut >= weekStart && coursDebut <= weekEnd &&
+                                  dayName === dayShort &&
+                                  coursDebut.getHours() === hour.start &&
+                                  coursFin.getHours() === hour.end &&
+                                  String(c.matiere_classes?.enseignant?.id_enseignant) === String(prof)
+                                );
+                              });
+                            let cellContent = null;
+                            let cellClass = styles.timeSlot;
+                            if (matchedCours) {
+                              cellContent = <div className={styles.courseIndicator}>{matchedCours.matiere_classes.matiere.nom_matiere}</div>;
+                              cellClass += ` ${styles.course}`; 
+                            } else if (matchedDispo) {
+                              cellContent = <div className={styles.availableIndicator}>Disponible</div>;
+                              cellClass += ` ${styles.available}`;
+                            }
+                              const available = !!matchedDispo;
 
                             return (
                               
                               <td
                                 key={`${day}-${hour.start}`}
-                                className={`${styles.timeSlot} ${available ? styles.available : ""}`}
+                                className={`${styles.timeSlot} ${available || cellContent ? styles.available : ""}`}
                                 onClick={() => {
                               if (available && matchedDispo) {
                                   setShowModalAddCours(true);
@@ -374,7 +417,7 @@ const handleAdd = async () => {
                                 }
                                 }}
                               >
-                                {available && <div className={styles.availableIndicator}>Disponible</div>}
+                                {cellContent}
                               </td>
                             );
                           })}
@@ -418,27 +461,54 @@ const handleAdd = async () => {
                               );
                             });
 
+                            const weekStart = new Date(weekData.debut_semaine);
+                            const weekEnd = new Date(weekData.debut_semaine);
+                            weekEnd.setDate(weekEnd.getDate() + 6);
+                            const matchedCours = cours.find((c) => {
+                              const coursDebut = new Date(c.cours_debut);
+                              const coursFin = new Date(c.cours_fin);
+                              const dayName = coursDebut.toLocaleDateString("fr-FR", { weekday: "short" }).slice(0,2).toLowerCase();
+                              const dayShort = day.slice(0,2).toLowerCase();
+
+                              return (
+                                coursDebut >= weekStart && coursDebut <= weekEnd &&
+                                dayName === dayShort &&
+                                coursDebut.getHours() === hour.start &&
+                                coursFin.getHours() === hour.end &&
+                                String(c.matiere_classes?.enseignant?.id_enseignant) === String(prof)
+                              );
+                            });
+                          let cellContent = null;
+                          let cellClass = styles.timeSlot;
+                          if (matchedCours) {
+                            cellContent = <div className={styles.courseIndicator}>{matchedCours.matiere_classes.matiere.nom_matiere}</div>;
+                            cellClass += ` ${styles.course}`; 
+                          } else if (matchedDispo) {
+                            cellContent = <div className={styles.availableIndicator}>Disponible</div>;
+                            cellClass += ` ${styles.available}`;
+                          }
                             const available = !!matchedDispo;
                               return (
                                 <td
                                   key={`${day}-${hour.start}`}
-                                  className={`${styles.timeSlot} ${available ? styles.available : ""}`}
+                                  className={`${styles.timeSlot} ${available || cellContent? styles.available : ""}`}
                                   onClick={async() => {
-                                    if (available && matchedDispo) {
-                                  setShowModalAddCours(true);
+                                  if (available && matchedDispo) {
+                                    setShowModalAddCours(true);
 
-                                  const dateDebut = new Date(matchedDispo.dispo_debut);
-                                  const dateFin = new Date(matchedDispo.dispo_fin);
-                                  setSelectedDate({
-                                    dateDebut : formatDateTime(dateDebut),
-                                    dateFin : formatDateTime(dateFin)
-                                  })
-                                    getSallesAvalaible(setSalle, dateDebut.toISOString());
-                                  
+                                    const dateDebut = new Date(matchedDispo.dispo_debut);
+                                    const dateFin = new Date(matchedDispo.dispo_fin);
+                                    setSelectedDate({
+                                      dateDebut : formatDateTime(dateDebut),
+                                      dateFin : formatDateTime(dateFin)
+                                    })
+                                      getSallesAvalaible(setSalle, dateDebut.toISOString());
+                                    
+                                  }
+                                  }
                                 }
-                                }}
                                 >
-                                  {available && <div className={styles.availableIndicator}>Disponible</div>}
+                                  {cellContent}
                                 </td>
                               );
                             })}

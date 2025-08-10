@@ -134,7 +134,7 @@ export default function CoursComponent() {
     
     return filteredCours.filter((c) => {
       const coursDate = new Date(c.cours_debut);
-      const coursDay = coursDate.getDay(); // 0=dimanche, 1=lundi, etc.
+      const coursDay = coursDate.getDay(); 
       const startHour = coursDate.getHours();
       
       const dayMap: { [key: number]: string } = {

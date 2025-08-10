@@ -24,6 +24,7 @@ export interface MatiereClasse {
 }
 
 export interface newMc{
+    id_mc:number
     matiere:{id_matiere : number},
     classe : {
         id_parcours: number;
@@ -105,7 +106,7 @@ export const addMatiereClasse = async (data: newMc, setData: (data: any) => void
     }
 }
 
-export const updateMatiereClasse = async (data: MatiereClasse, setData: (data: any) => void) => {
+export const updateMatiereClasse = async ( data: newMc, setData: (data: any) => void) => {
     try {
         const response = await  apilog.put(`/matiere_classe/${data.id_mc}`, data);
         getMatiereClasse(setData);
@@ -115,10 +116,9 @@ export const updateMatiereClasse = async (data: MatiereClasse, setData: (data: a
     }
 }
 
-export const removeMatiereClasse = async (id: number, setData: (data: any) => void) => {
+export const removeMatiereClasse = async (id: number) => {
     try {
         const response = await  apilog.delete(`/matiere_classe/${id}`);
-        getMatiereClasse(setData);
     } catch (error) {
         console.error("Erreur lors de la suppression de la matière :", error);
         throw error;

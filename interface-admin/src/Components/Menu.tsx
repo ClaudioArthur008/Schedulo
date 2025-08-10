@@ -4,8 +4,6 @@ import { useRouter } from 'next/navigation';
 import Image from "next/image";
 import Link from "next/link";
 
-
-
 const Menu = () => {
     const router = useRouter();
  const handleLogout = () => {
@@ -52,24 +50,14 @@ const menuItems = [
         href: "/list/cours",
       },
       {
-        icon: "/lesson.png",
-        label: "Matières",
-        href: "/list/matieres",
+        icon: "/class.png",
+        label: "Groupes",
+        href: "/list/groupes",
       },
       {
         icon: "/class.png",
-        label: "Classes",
-        href: "/list/classes",
-      },
-      {
-        icon: "/class.png",
-        label: "Mentions",
-        href: "/list/mentions",
-      },
-      {
-        icon: "/class.png",
-        label: "Parcours",
-        href: "/list/parcours",
+        label: "Présence",
+        href: "/list/presences",
       }
 
     ],

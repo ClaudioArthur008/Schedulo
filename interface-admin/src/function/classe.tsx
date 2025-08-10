@@ -5,15 +5,15 @@ export interface newParcours {
     id_parcours: number;
         nom_parcours: string;
         code_parcours: string;
-        mentionIdMention: number;
+        mention: { id_mention: number};
 }
 
 export interface newClasse {
     id_parcours: number,
     id_niveau: string,
     groupe: string,
-    niveauIdNiveau: string,
-    parcoursIdParcours: number
+    niveau: {id_niveau: string},
+    parcours: {id_parcours: number},
 }
 //niveau
 export const getNiveau = async (token:string) => {
@@ -78,7 +78,7 @@ export const addMention = async (mention: Mention, token:string)=>{
 
 export const updateMention = async (mention: Mention, token:string)=>{
     try {
-        const response = await  api(token!).put(`/mention/${mention}`, mention);
+        const response = await  api(token!).put(`/mention/${mention.id_mention}`, mention);
         return response.data;
     } catch (error) {
         console.error("Erreur lors de la mise à jour de la mention :", error);
@@ -96,7 +96,6 @@ export const removeMention = async (id: number, token:string)=>{
     }
 }
 
-//parcours
 export const getParcours = async (setData: (data: Parcours[]) => void, token:string) => {
     try {
         const response = await  api(token!).get("/Parcours");

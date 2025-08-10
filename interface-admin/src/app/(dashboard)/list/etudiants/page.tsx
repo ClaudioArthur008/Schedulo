@@ -8,6 +8,8 @@ import { DownOutlined } from '@ant-design/icons';
 import api from "@/api/axios";
 import { UserInfo } from "@/interface/Type";
 import { useSearchParams } from "next/navigation";
+import { Edit2, Trash2, Users } from "lucide-react";
+import DeleteConfirmation from "@/Components/DeleteConfirmation";
 
 const EtudiantsPage = () => {
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
@@ -22,44 +24,44 @@ const EtudiantsPage = () => {
     });
     const [classeItem, setClasseItem]= useState<Classes[]>([]);
     const [showModal, setShowModal] = useState(false);
+    const[openModal, setOpenModal]=useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [filter, setFilter] = useState<string | null>(null);
     const [groupByKey, setGroupByKey] = useState<'Classe' | 'Titre' | null>(null);
-    const searchParams = useSearchParams();
-    const searchTerm = searchParams.get('search') || '';
+    const [searchTerm, setSearchTerm] = useState("");
     const fetchEtudiants = () => {
         getEtudiant(setEtudiants,token!);
+    }
+
+    useEffect(() => {
+        const userJson = sessionStorage.getItem("user");
+        const user = userJson ? JSON.parse(userJson) : null;
+        const userId = user?.id;
+
+        if (userId) {
+        const token = sessionStorage.getItem("token");
+        setToken(token);
+        api(token!).get(`/utilisateur/${userId}`)
+            .then(response => {
+            setUserInfo(response.data);
+            })
+            .catch(error => {
+            console.error("Erreur lors de la récupération des données utilisateur :", error);
+            });
         }
+    }, []);
+        useEffect(() => {
+        if (userInfo?.enseignant?.id_enseignant) {
+            fetchEtudiants();
+            getClass(setClasseItem,token!);
+        }
+        }, [userInfo]);
 
-    useEffect(() => {
-    const userJson = sessionStorage.getItem("user");
-    const user = userJson ? JSON.parse(userJson) : null;
-    const userId = user?.id;
-
-    if (userId) {
-      const token = sessionStorage.getItem("token");
-      setToken(token);
-       api(token!).get(`/utilisateur/${userId}`)
-        .then(response => {
-          setUserInfo(response.data);
-        })
-        .catch(error => {
-          console.error("Erreur lors de la récupération des données utilisateur :", error);
-        });
-    }
-  }, []);
-    useEffect(() => {
-    if (userInfo?.enseignant?.id_enseignant) {
-        fetchEtudiants();
-        getClass(setClasseItem,token!);
-    }
-      }, [userInfo]);
-
-    let utilisateursFiltres = etudiants.filter((item) => {
-        const user = item.matricule.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            item.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            item.prenom.toLowerCase().includes(searchTerm.toLowerCase());
-        return user;
+        let utilisateursFiltres = etudiants.filter((item) => {
+            const user = item.matricule.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                item.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                item.prenom.toLowerCase().includes(searchTerm.toLowerCase());
+            return user;
     });
 
     if (filter === '1') {
@@ -161,88 +163,194 @@ const EtudiantsPage = () => {
         setShowModal(false);
         resetModalForm();
     };
+
+    const handleDeleteModalClose=()=>{
+        setOpenModal(false);
+    }
+
+    const handleDelete=async(etudiant : any)=> {
+        await remove(etudiant.matricule, token!);
+        resetModalForm();
+        handleDeleteModalClose();
+        fetchEtudiants(); 
+
+    }
+
+    const EtudiantCard = ({ etudiant }: { etudiant: Etudiant }) => (
+    <div className="bg-white m-1 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 overflow-hidden">
+      <div className="p-5">
+        <div className="flex items-start justify-between ">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 ">
+              <div className=" bg-black w-12 h-12  rounded-full flex items-center justify-center text-white font-semibold text-lg">
+                {etudiant.nom.charAt(0)}{etudiant.prenom.charAt(0)}
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                   {etudiant.nom} 
+                </h3>
+                <p className="text-lg font-base text-gray-700"> {etudiant.prenom}</p>
+                <p className="text-sm text-gray-500 font-mono">{etudiant.matricule}</p>
+                <p className="text-sm text-gray-500 font-mono">{etudiant.classe.id_niveau} {etudiant.classe.parcours.code_parcours} gp {etudiant.classe.groupe}</p>
+
+              </div>
+            </div>
+            
+            {etudiant.titre && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 text-xs rounded-full">
+                  <Users size={12} />
+                  {etudiant.titre===1 ? "Simple étudiant(e)" : "Delegué"}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2">
+          <div className="flex gap-1 ">
+            <button
+                onClick={() => {
+                    const classe = `${etudiant.classe.id_parcours}-${etudiant.classe.id_niveau}-${etudiant.classe.groupe}`
+                    setNewEtudiant({
+                        matricule: etudiant.matricule,
+                        nom: etudiant.nom,
+                        prenom: etudiant.prenom,
+                        titre: etudiant.titre,
+                        classeKey: classe
+                    });
+                    setIsEditing(true);
+                    setShowModal(true);
+                }}
+              className="p-2 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-colors"
+              title="Modifier"
+            >
+              <Edit2 size={16} />
+            </button>
+            
+            <button
+                onClick={async () => {
+                    const classe = `${etudiant.classe.id_parcours}-${etudiant.classe.id_niveau}-${etudiant.classe.groupe}`
+                    setNewEtudiant({
+                        matricule: etudiant.matricule,
+                        nom: etudiant.nom,
+                        prenom: etudiant.prenom,
+                        titre: etudiant.titre,
+                        classeKey: classe
+                    });
+                    setOpenModal(true);
+
+                }}
+              className="p-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg transition-colors"
+              title="Supprimer"
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
     return (
         <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
             {showModal && (
                 <Modal onCancel={handleModalClose} open={showModal} footer={null}>
-                    <h1 className="text-2xl font-semibold">
-                        {isEditing ? "Modifier l'information de l'enseignant" : "Ajouter un enseignant"}
+                    <h1 className="text-2xl font-semibold py-4 border-b border-gray-500">
+                        {isEditing ? "Modifier l'information de l'étudiant(e)" : "Ajouter un(e) étudiant(e)"}
                     </h1><br />
+                    <div className="p-6 space-y-4">
+                         <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Matricule
+                            </label>
+                            <input
+                                className="w-full px-3 py-2 border border-gray-200 rounded-lg  "
+                                type="text"
+                                placeholder="2928"
+                                value={newEtudiant.matricule}
+                                disabled={isEditing}
+                                onChange={(e) => setNewEtudiant({ ...newEtudiant, matricule: e.target.value })}
+                            />
+                        </div>
+                         <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Nom
+                            </label>
+                            <input
+                                className="w-full px-3 py-2 border border-gray-200 rounded-lg  "
+                                type="text"
+                                placeholder="Ranjamino"
+                                value={newEtudiant.nom}
+                                onChange={(e) => setNewEtudiant({ ...newEtudiant, nom: e.target.value })}
+                            />
+                        </div>
+                         <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Prénom
+                            </label>
+                            <input
+                                className="w-full px-3 py-2 border border-gray-200 rounded-lg  "
+                                type="text"
+                                placeholder="Diamondra"
+                                value={newEtudiant.prenom}
+                                onChange={(e) => setNewEtudiant({ ...newEtudiant, prenom: e.target.value })}
+                            />
+                        </div>
+                         <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Classe
+                            </label>
+                            <Select
+                                    placeholder="Niveau"
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg  "
+                                    value={newEtudiant.classeKey}
+                                    onChange={(e)=>setNewEtudiant({...newEtudiant, classeKey : e })}
 
-                    <input
-                        className="w-full mb-2 p-2 border border-gray-300 rounded"
-                        type="text"
-                        placeholder="Matricule de l'étudiant"
-                        value={newEtudiant.matricule}
-                        onChange={(e) => setNewEtudiant({ ...newEtudiant, matricule: e.target.value })}
-                    />
-
-                    <input
-                        className="w-full mb-2 p-2 border border-gray-300 rounded"
-                        type="text"
-                        placeholder="Nom de l'étudiant"
-                        value={newEtudiant.nom}
-                        onChange={(e) => setNewEtudiant({ ...newEtudiant, nom: e.target.value })}
-                    />
-                    
-                    <input
-                        className="w-full mb-2 p-2 border border-gray-300 rounded"
-                        type="text"
-                        placeholder="Prénom de l'étudiant"
-                        value={newEtudiant.prenom}
-                        onChange={(e) => setNewEtudiant({ ...newEtudiant, prenom: e.target.value })}
-                    />
-
-                    <Select
-                            placeholder="Niveau"
-                            className="w-full mb-4 p-2 border border-gray-300 rounded"
-                            value={newEtudiant.classeKey}
-                            onChange={(e)=>setNewEtudiant({...newEtudiant, classeKey : e })}
-                           
-                        >
-                            {classeItem.map((classe) => (
-                                <Select.Option
-                                    key={`${classe.id_parcours}-${classe.id_niveau}-${classe.groupe}`}
-                                    value={`${classe.id_parcours}-${classe.id_niveau}-${classe.groupe}`}
-                                    >
-                                    {`${classe.id_niveau} ${classe.parcours.code_parcours} gp${classe.groupe}`}
-                                    </Select.Option>
-                            ))}
-                    </Select>
-
-                    <div className="flex items-center mb-4">
-                        <input 
-                            type="radio"
-                            id="Simple"
-                            name="titre"
-                            value="1"
-                            checked={newEtudiant.titre === 1}
-                            onChange={() => setNewEtudiant({ ...newEtudiant, titre: 1 })}
-                            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                        />
-                        <label className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Simple</label>
+                                >
+                                    {classeItem.map((classe) => (
+                                        <Select.Option
+                                            key={`${classe.id_parcours}-${classe.id_niveau}-${classe.groupe}`}
+                                            value={`${classe.id_parcours}-${classe.id_niveau}-${classe.groupe}`}
+                                            >
+                                            {`${classe.id_niveau} ${classe.parcours.code_parcours} gp${classe.groupe}`}
+                                            </Select.Option>
+                                    ))}
+                            </Select>
+                        </div>
+                        <div>
+                             <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Titre
+                                </label>
+                                <div className="flex items-center mb-4">
+                                <input 
+                                    type="radio"
+                                    id="Simple"
+                                    name="titre"
+                                    value="1"
+                                    checked={newEtudiant.titre === 1}
+                                    onChange={() => setNewEtudiant({ ...newEtudiant, titre: 1 })}
+                                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                />
+                                <label className="ms-2 text-sm  text-gray-900 dark:text-gray-300">Simple</label>
+                            </div>
+                            <div className="flex items-center mb-4">
+                                <input 
+                                    type="radio"
+                                    id="css"
+                                    name="titre"
+                                    value="2"
+                                    checked={newEtudiant.titre === 2}
+                                    onChange={() => setNewEtudiant({ ...newEtudiant, titre: 2 })}
+                                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                />
+                                <label className="ms-2 text-sm  text-gray-900 dark:text-gray-300">Délegué</label>
+                            </div>
+                            </div>
+                        </div>
                     </div>
-                    <div className="flex items-center mb-4">
-                        <input 
-                            type="radio"
-                            id="css"
-                            name="titre"
-                            value="2"
-                            checked={newEtudiant.titre === 2}
-                            onChange={() => setNewEtudiant({ ...newEtudiant, titre: 2 })}
-                            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                        />
-                        <label className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Délegué</label>
-                    </div>
-
 
                     <div className="flex justify-end gap-2 mt-4">
-                        <button
-                            onClick={handleModalClose}
-                            className="text-red-500 bg-gray-200 px-4 py-2 rounded hover:bg-gray-300 cursor-pointer"
-                        >
-                            Annuler
-                        </button>
                         <button
                             className="bg-green-500 hover:bg-green-600 cursor-pointer text-white py-2 px-4 rounded-md"
                             onClick={async () => {
@@ -259,13 +367,26 @@ const EtudiantsPage = () => {
                         >
                             {isEditing ? "Modifier" : "Ajouter"}
                         </button>
+                        <button
+                            onClick={handleModalClose}
+                            className="border border-gray-200 text-gray-700 py-2 px-4  rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                        >
+                            Annuler
+                        </button>
+                        
                     </div>
                 </Modal>
             )}
+
+            <DeleteConfirmation showModal={openModal} handleModalClose={handleDeleteModalClose} handleDelete={async()=>{handleDelete(newEtudiant)}}/>
+
             <div className="flex items-center justify-between">
-                <h1 className="hidden md:block text-2xl font-semibold">Liste des Etudiants</h1>
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-1">Gestion des Etudiants</h1>
+                    <p className="text-gray-600">Gérez les informations de vos étudiants</p>  
+                </div> 
                 <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-                    <TableSearch placeholder="Recherche..."/>
+                    <TableSearch placeholder="Recherche..." value={searchTerm} onChange={setSearchTerm} />
                     <div className="flex items-center gap-4 self-end">
                         <Dropdown menu={{items, onClick: handleMenuClick}}>
                             <button className="cursor-pointer w-8 h-8 flex items-center justify-center rounded-full bg-green-100">
@@ -287,74 +408,8 @@ const EtudiantsPage = () => {
                 </div>
             </div>
 
-            {/* <table className="w-full mt-4">
-                <thead>
-                    <tr className="text-left text-gray-500 text-sm">
-                        <th className="py-2 px-4">Matricule </th>
-                        <th className="py-2 px-4">Nom</th>
-                        <th className="py-2 px-4">Prénom</th>
-                        <th className="py-2 px-4">
-                                Titre
-                        </th>
-                        <th className="py-2 px-4">
-                            Classes
-                        </th>
-                        <th className="py-2 px-4">Actions</th>
-                    </tr>
-                </thead>
-                <tbody className="">
-                    {utilisateursFiltres.map((etudiant, index) => (
-                                            <tr key={index} className="text-gray-700 text-sm border-b border-gray-100 hover:bg-gray-50 transition duration-200">
-                    
-                                                <td className="py-2 px-4">{etudiant.matricule}</td>
-                    
-                                                <td className="py-2 px-4">{etudiant.nom}</td>
-                    
-                                                <td className="py-2 px-4">{etudiant.prenom}</td>
-                    
-                                                <td className="py-2 px-4">
-                                                    {etudiant.titre === 1 ? "Simple" : "Délegué"}
-                                                </td>
-                    
-                                                <td>{etudiant.classe.id_niveau} {etudiant.classe.parcours.code_parcours}  gp{etudiant.classe.groupe}</td>
-                                              
-                                                
-                                                <td className="py-2 px-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <button
-                                                        onClick={() => {
-                                                            const classe = `${etudiant.classe.id_niveau} ${etudiant.classe.parcours.code_parcours} ${etudiant.classe.groupe}`
-                                                           setNewEtudiant({
-                                                               matricule: etudiant.matricule,
-                                                               nom: etudiant.nom,
-                                                               prenom: etudiant.prenom,
-                                                               titre: etudiant.titre,
-                                                               classeKey: classe
-                                                           });
-                                                            setIsEditing(true);
-                                                            setShowModal(true);
-                                                        }}
-                                                        className="cursor-pointer w-8 h-8 flex items-center justify-center rounded-full bg-green-100">
-                                                        <Image src="/edit.png" alt="Modifier" width={20} height={20} />
-                                                        </button>
-                                                        <button 
-                                                            onClick={async () => {
-                                                                if (confirm("Supprimer ce professeur ?")) {
-                                                                    await remove(etudiant.matricule, token!);
-                                                                    fetchEtudiants(); 
-                                                                }
-                                                            }}
-                                                        className="cursor-pointer w-8 h-8 flex items-center justify-center rounded-full bg-red-200">
-                                                        <Image src="/delete.png" alt="Supprimer" width={20} height={20} />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                </tbody>
-            </table> */}
-                <div className="w-full mt-4">
-                    {groupByKey ? (
+            <div className="w-full mt-4">
+                    {/* {groupByKey ? (
                         Object.entries(groupedUsers).map(([group, users]) => (
                                 <>
                                 <p  className="font-semibold text-md bg-gray-100 py-2 px-4">{group? group.toUpperCase() : " Aucun"}</p>
@@ -474,6 +529,39 @@ const EtudiantsPage = () => {
                                     </Col>                      
                                 ))}   
                             </Row>
+                    )
+                    } */}
+                {groupByKey ? (
+                    Object.entries(groupedUsers).map(([group, users]) => (
+                        <>
+                            <p  className="font-semibold text-md bg-gray-100 py-2 px-4">{group? group.toUpperCase() : " Aucun"}</p>
+                            <Row gutter={16} key={group} >
+                                {users.map((e) => (
+                                    <Col span={8} className="py-1"  key={e.matricule} 
+                                    xs={24}
+                                    sm={12}
+                                    md={8}
+                                    lg={6}  
+                            >
+                                        <EtudiantCard key={e.matricule } etudiant={e} />
+                                    </Col>
+                                ))}
+                                </Row>
+                                </>
+                        ))
+                    ):(
+                        <Row gutter={16}>
+                            {utilisateursFiltres.map((e) => (
+                                <Col span={8} className="py-1"  key={e.matricule} 
+                                            xs={24}
+                                            sm={12}
+                                            md={8}
+                                            lg={6}   
+                                >
+                                    <EtudiantCard key={e.matricule } etudiant={e} />
+                                </Col>
+                        ))}
+                        </Row>
                     )
                     }
             </div>

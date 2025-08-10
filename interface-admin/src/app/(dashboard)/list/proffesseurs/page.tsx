@@ -9,19 +9,18 @@ import { useRouter } from "next/navigation";
 import apilog from '@/api/api'
 import { UserInfo } from "@/interface/Type";
 import { useSearchParams } from 'next/navigation';
-import { addMatiereClasse, Classe, getMatiere, getMatiereClasse, Matiere, MatiereClasse } from "@/function/matiere";
-import {UnorderedListOutlined } from "@ant-design/icons";
+import { addMatiereClasse, Classe, getMatiere, getMatiereClasse, Matiere, MatiereClasse, removeMatiereClasse, updateMatiereClasse } from "@/function/matiere";
 import {Edit2, Trash2, List, Users, BookOpen, Calendar } from 'lucide-react';
-import { getClasse } from "@/function/classe";
 import { getClass } from "@/function/etudiant";
+import DeleteConfirmation from "@/Components/DeleteConfirmation";
 
 const ProffesseursPage = () => {     
-      interface Proffesseur {
+    interface Proffesseur {
         id_enseignant: string;
         nom: string;
         prenom: string;
         matiere_classe?: MatiereClasse[]
-      }
+    }
     
     type Combinaison = {
     classe: Classe;
@@ -35,10 +34,22 @@ const ProffesseursPage = () => {
         nom: "",
         prenom: ""
     });
+    const [oldId, setOldId]= useState<string>("")
+    const [expandedProfId, setExpandedProfId] = useState<string | null>(null);
+    const [showModal, setShowModal] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [deleteConfirmationOpen, setDeleteConfirmationOpen]=useState(false);
+    const router = useRouter();
+    const [filtreActuel, setFiltreActuel] = useState<string | null>(null);
+    const [groupByKey, setGroupByKey] = useState<'2' | '3'| '4' | null>(null);
+    const [searchTerm, setSearchTerm] = useState("");
+    const allCombinations: Combinaison[] = [];
+
     const [matiere_classes, setMatiere_classes]= useState<MatiereClasse[]>([]);
     const [classes,setClasses]= useState<Classe[]>([]);
     const [matieres,setMatiere]= useState<Matiere[]>([]);
     const [newMc, setNewMc] = useState({
+    id_mc:0,
     matiere:{id_matiere : 0},
     classe : {
         id_parcours: 0,
@@ -47,24 +58,15 @@ const ProffesseursPage = () => {
     },
         enseignant : {id_enseignant : ""}
     });
-    const [proNotClasse, setProfNotClasse]= useState<Classe[]>([]);
     const [profMatiere, setProfMatiere] = useState<string | null>(null);
     const [profMc, setProfMc] = useState<Combinaison[]>([]);
     const [selectedClasse, setSelectedClasse] = useState<string | null>(null);
-    const [selectedMatiere, setSelectedMatiere] = useState(null);
-    const [oldId, setOldId]= useState<string>("")
-    const [expandedProfId, setExpandedProfId] = useState<string | null>(null);
-    const [showModal, setShowModal] = useState(false);
+    const [selectedMatiere, setSelectedMatiere] = useState<string | null>(null);
+    const [selectedMatiereNom, setSelectedMatiereNom] = useState<string | null>(null);
     const [showMcModal, setShowMcModal] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
-    const router = useRouter();
-    const [filtreActuel, setFiltreActuel] = useState<string | null>(null);
-    const [groupByKey, setGroupByKey] = useState<'2' | '3'| '4' | null>(null);
-    const searchParams = useSearchParams();
-    const searchTerm = searchParams.get('search') || '';
-    const allCombinations: Combinaison[] = [];
+    const [open, setOpen]=useState(false);
+  
 
-    
     const fetchProfesseurs = async () => {
             try {
                 const response = await getAll(token!);
@@ -73,6 +75,17 @@ const ProffesseursPage = () => {
                 console.error("Erreur lors de la récupération des enseignants :", error);
             }
     };
+
+    const handleDeleteModalClose=()=>{
+      resetModalForm();
+      setOpen(false)
+    }
+
+    const handleDelete=async(prof: Proffesseur)=>{
+      await remove(prof.id_enseignant, token!); 
+      const newProf = await getAll(token!);
+      setProffesseurs(newProf);
+    }
 
     useEffect(() => {
         const userJson = sessionStorage.getItem("user");
@@ -104,6 +117,7 @@ const ProffesseursPage = () => {
         }
         
       }, []);
+
 
     const items: MenuProps['items'] = [
     {
@@ -155,34 +169,58 @@ const ProffesseursPage = () => {
         return user;
     });
 
-    const classeFiltres = (id:string)=>{
+    const groupedUsers = groupByKey ? groupBy(utilisateursFiltres, user => {
+        if (groupByKey === '2') return user.matiere_classe?.[0]?.matiere?.nom_matiere ?? '';
+        if (groupByKey === '3') {
+            const classe = user.matiere_classe?.[0]?.classe;
+            return classe
+                ? `${classe.id_niveau} ${classe.parcours?.code_parcours ?? ''} gp${classe.groupe ?? ''}`
+                : '';
+        }
+        return '';
+    }) : { 'Tous les proffesseurs': proffesseurs };
+    const handleMenuClick: MenuProps['onClick'] = (e) => {
+        setFiltreActuel(e.key);
+    };
 
+    {/* reset prof form*/}
+    const resetModalForm = () => {
+        setNewprof({
+            id_enseignant: "",
+            nom: "",
+            prenom: "",
 
-        const mc=matiere_classes.filter((item)=>{
-            return item.enseignant.id_enseignant.toLowerCase()!=id.toLocaleLowerCase();
-        })
-        const mcfinal = Array.from(
-                            new Map(
-                                mc.map((mc) => [
-                                `${mc.classe.id_parcours}-${mc.classe.id_niveau}-${mc.classe.groupe}`,
-                                mc.classe,
-                                ])
-                            ).values()
-                        );
-        setProfNotClasse(mcfinal);
-    }
+        });
+        setIsEditing(false);
+    };
+    const handleModalClose = () => {
+        setShowModal(false);
+        setShowMcModal(false);
+        setIsEditing(false);
+        setSelectedClasse(null);
+        setSelectedMatiere(null);
+        setSelectedMatiereNom(null);
+        resetModalForm();
+    };
 
-    const filteredMatieres = selectedClasse
-    ? matiere_classes.filter(
-        (mc) =>
-          `${mc.classe.id_parcours}-${mc.classe.id_niveau}-${mc.classe.groupe}` === selectedClasse
-      )
-    : [];
+    const splitClasse = (classe:string)=>{
+        const [id_parcours, id_niveau, groupe] = classe.split("-");
+        setNewMc({
+            ...newMc,
+            classe:{
+                id_parcours: Number(id_parcours),
+                id_niveau: id_niveau,
+                groupe: Number(groupe)
+            },
+           
+        });
+    };
 
+    {/* Filter matiere and classes for a prof*/}
     for (const classe of classes) {
-    for (const matiere of matieres) {
-        allCombinations.push({ classe, matiere });
-    }
+      for (const matiere of matieres) {
+          allCombinations.push({ classe, matiere });
+      }
     }
 
     const allClasseMatiere =(id: string)=>{
@@ -210,52 +248,84 @@ const ProffesseursPage = () => {
 
     }
 
+    const getAvailableClasses = (profMc: any[]) => {
+    const uniqueClasses = new Map();
     
-
-    const groupedUsers = groupByKey ? groupBy(utilisateursFiltres, user => {
-        if (groupByKey === '2') return user.matiere_classe?.[0]?.matiere?.nom_matiere ?? '';
-        if (groupByKey === '3') {
-            const classe = user.matiere_classe?.[0]?.classe;
-            return classe
-                ? `${classe.id_niveau} ${classe.parcours?.code_parcours ?? ''} gp${classe.groupe ?? ''}`
-                : '';
+    profMc.forEach(mc => {
+        const key = `${mc.classe.id_parcours}-${mc.classe.id_niveau}-${mc.classe.groupe}`;
+        if (!uniqueClasses.has(key)) {
+            uniqueClasses.set(key, {
+                key,
+                classe: mc.classe,
+                display: `${mc.classe.id_niveau} ${mc.classe.parcours.code_parcours} gp${mc.classe.groupe}`
+            });
         }
-        return '';
-    }) : { 'Tous les proffesseurs': proffesseurs };
+    });
+    
+    return Array.from(uniqueClasses.values());
+};
 
-    const handleMenuClick: MenuProps['onClick'] = (e) => {
-        setFiltreActuel(e.key);
-    };
-      const resetModalForm = () => {
-        setNewprof({
-            id_enseignant: "",
-            nom: "",
-            prenom: "",
+const getAvailableMatieresForClasse = (profMc: any[], selectedClasseKey: string) => {
+    return profMc
+        .filter(mc => {
+            const classeKey = `${mc.classe.id_parcours}-${mc.classe.id_niveau}-${mc.classe.groupe}`;
+            return classeKey === selectedClasseKey;
+        })
+        .map(mc => mc.matiere);
+};
 
+const availableClasses = getAvailableClasses(profMc);
+const availableMatieres = selectedClasse ? getAvailableMatieresForClasse(profMc, selectedClasse) : [];
+
+{/* reset Matiere classe form*/}
+    const resetMcModalForm = () => {
+        allClasseMatiere(newMc.enseignant.id_enseignant)
+        setNewMc({
+          id_mc:0,
+          matiere:{id_matiere : 0},
+          classe : {
+              id_parcours: 0,
+              id_niveau: "",
+              groupe: 0,
+          },
+          enseignant : {id_enseignant : ""}
         });
+        setSelectedMatiereNom(null);
+        fetchProfesseurs();
         setIsEditing(false);
     };
-    const handleModalClose = () => {
-        setShowModal(false);
-        setShowMcModal(false)
-        resetModalForm();
-    };
 
-    const splitClasse = (classe:string)=>{
-        const [id_parcours, id_niveau, groupe] = classe.split("-");
-        setNewMc({
-            ...newMc,
-            classe:{
-                id_parcours: Number(id_parcours),
-                id_niveau: id_niveau,
-                groupe: Number(groupe)
-            },
-           
-        });
-    };
+    const ShowEditMcModal=(prof : Proffesseur)=>{
+      setIsEditing(true);
+      setNewMc({...newMc, enseignant:{id_enseignant:prof.id_enseignant} });
+      allClasseMatiere(prof.id_enseignant);
+      setShowMcModal(true);
+    }
 
     const handleAddMc=async ()=>{
-        await addMatiereClasse(newMc, setMatiere_classes)
+      handleModalClose();
+      await addMatiereClasse(newMc, setMatiere_classes);
+      fetchProfesseurs();
+      resetMcModalForm();
+    }
+
+    const handleEditMc=async ()=>{
+      handleModalClose();
+      await updateMatiereClasse(newMc, setMatiere_classes);
+       fetchProfesseurs();
+      resetMcModalForm();
+
+    }
+
+    const handleDeletemcModalClose=()=>{
+      resetModalForm();
+      setDeleteConfirmationOpen(false);
+    }
+
+    const handleDeleteMc=async(mc: any)=>{
+      await removeMatiereClasse(mc.id_mc); 
+      setDeleteConfirmationOpen(false);
+      fetchProfesseurs();
     }
 
     const ProfessorCard = ({ prof }: { prof: Proffesseur }) => (
@@ -271,13 +341,14 @@ const ProffesseursPage = () => {
                 <h3 className="text-lg font-semibold text-gray-900">
                    {prof.nom} {prof.prenom}
                 </h3>
+                
                 <p className="text-sm text-gray-500 font-mono">{prof.id_enseignant}</p>
               </div>
             </div>
             
             {prof.matiere_classe && prof.matiere_classe.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-3">
-                <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full">
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-50 text-yellow-700 text-xs rounded-full">
                   <BookOpen size={12} />
                   {prof.matiere_classe[0].matiere.nom_matiere}
                 </span>
@@ -308,7 +379,7 @@ const ProffesseursPage = () => {
               setProfMatiere(null);
               setExpandedProfId(expandedProfId === prof.id_enseignant ? null : prof.id_enseignant);
             }}
-            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors text-sm"
+            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-yellow-50 hover:bg-yellow-100 text-yellow-700 rounded-lg transition-colors text-sm"
             title="Voir disponibilités"
           >
             <Calendar size={16} />
@@ -330,10 +401,9 @@ const ProffesseursPage = () => {
             </button>
             
             <button
-              onClick={async() =>{ await remove(
-                prof.id_enseignant, token!); 
-                const newProf = await getAll(token!);
-                setProffesseurs(newProf);
+              onClick={async() =>{ 
+                setNewprof(prof);
+                setOpen(true)
             }}
               className="p-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg transition-colors"
               title="Supprimer"
@@ -344,23 +414,22 @@ const ProffesseursPage = () => {
         </div>
       </div>
 
-      {/* Section Matières */}
       {profMatiere === prof.id_enseignant && (
         <div className="border-t border-gray-100 bg-gray-50">
           <div className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h4 className="text-lg font-semibold text-gray-900">Matières enseignées</h4>
               <button onClick={()=>{ 
-                        classeFiltres(prof.id_enseignant); 
                             setNewMc({...newMc, enseignant:{id_enseignant:prof.id_enseignant} });
                             setShowMcModal(true);
                             allClasseMatiere(prof.id_enseignant)
                         }} 
                 className="px-3 py-1 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg text-sm transition-colors">
-                Ajouter
+                Assigner à une matière
               </button>
             </div>
             
+            {/* Matière classe */}
             <div className="space-y-3">
               {prof.matiere_classe?.map((mc) => (
                 <div key={mc.id_mc} className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
@@ -370,13 +439,50 @@ const ProffesseursPage = () => {
                       {mc.classe.id_niveau} {mc.classe.parcours.code_parcours} - Groupe {mc.classe.groupe}
                     </p>
                   </div>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={async() => 
+                      {
+                        ShowEditMcModal(prof);
+                        setSelectedMatiereNom(mc.matiere.nom_matiere);
+                        setNewMc({
+                          ...mc,
+                          classe: {
+                            ...mc.classe,
+                            groupe: Number(mc.classe.groupe)
+                          }
+                        })
+                      }}
+                      className="p-2 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-colors"
+                      title="Modifier"
+                    >
+                      <Edit2 size={16} />
+                    </button>
+                    
+                    <button
+                      onClick={async()=>{
+                        setDeleteConfirmationOpen(true);
+                        setNewMc({
+                          ...mc,
+                          classe: {
+                            ...mc.classe,
+                            groupe: Number(mc.classe.groupe)
+                          }
+                        })
+                      }}
+                      className="p-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg transition-colors"
+                      title="Supprimer"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         </div>
       )}
-
+        {/* Disponibilité */}
       {expandedProfId === prof.id_enseignant && (
         <div className="border-t border-gray-100 bg-gray-50">
           <div className="p-6">
@@ -387,8 +493,6 @@ const ProffesseursPage = () => {
       )}
     </div>
   );
-
-
     return (
         <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
 
@@ -466,6 +570,7 @@ const ProffesseursPage = () => {
                     </div>
                 </Modal>
             )}
+
             {showMcModal && (
                 <Modal
                   onCancel={handleModalClose} open={showMcModal} footer={null}>
@@ -480,27 +585,19 @@ const ProffesseursPage = () => {
                             <Select
                                 placeholder="Classe"
                                 className="w-full mb-4 p-2 border border-gray-300 rounded"
-                                    onChange={(e) => {
-                                    setSelectedClasse(e);
-                                    setSelectedMatiere(null);
-                                    splitClasse(e)
+                                onChange={(e) => {
+                                setSelectedClasse(e);
+                                setSelectedMatiere(null);
+                                splitClasse(e)
                                 }}
+
+                                value={ isEditing ? (newMc? `${newMc.classe.id_parcours}-${newMc.classe.id_niveau}-${newMc.classe.groupe}` : "") : selectedClasse }
                             >
-                                {Array.from(
-                                    new Map(
-                                        profMc.map(mc => [
-                                            `${mc.classe.id_parcours}-${mc.classe.id_niveau}-${mc.classe.groupe}`,
-                                            mc.classe
-                                        ])
-                                    ).values()
-                                ).map((classe) => (
-                                    <Select.Option
-                                        key={`${classe.id_parcours}-${classe.id_niveau}-${classe.groupe}`}
-                                        value={`${classe.id_parcours}-${classe.id_niveau}-${classe.groupe}`}
-                                    >
-                                        {`${classe.id_niveau} ${classe.parcours.code_parcours} gp${classe.groupe}`}
-                                    </Select.Option>
-                                ))}
+                              {availableClasses.map(item => (
+                                  <Select.Option key={item.key} value={item.key}>
+                                      {item.display}
+                                  </Select.Option>
+                              ))}
                             </Select>
                         </div>
                          <div>
@@ -508,36 +605,32 @@ const ProffesseursPage = () => {
                             Matière
                             </label>
                             <Select
-                                placeholder="Matière"
-                                className="w-full mb-4 p-2 border border-gray-300 rounded"
-                                value={selectedMatiere}
-                                onChange={(e) => {
-                                    setSelectedMatiere(e);
-                                    setNewMc({ ...newMc, matiere: { id_matiere: Number(e)} });
-                                }}
-                                disabled={!selectedClasse}
-                            >
-                                {Array.from(
-                                    new Map(
-                                        profMc
-                                            .filter(mc => {
-                                                if (!selectedClasse) return true;
-                                                const [parcours, niveau, groupe] = selectedClasse.split('-');
-                                                return mc.classe.id_parcours === Number(parcours) &&
-                                                    mc.classe.id_niveau === niveau &&
-                                                    mc.classe.groupe === groupe;
-                                            })
-                                            .map(mc => [mc.matiere.id_matiere, mc.matiere])
-                                    ).values()
-                                ).map((matiere) => (
-                                    <Select.Option
-                                        key={matiere.id_matiere}
-                                        value={matiere.id_matiere}
-                                    >
-                                        {matiere.nom_matiere}
-                                    </Select.Option>
-                                ))}
-                            </Select>
+                              placeholder="Matière"
+                              className="w-full mb-4 p-2 border border-gray-300 rounded"
+                              labelInValue
+                              value={
+                                  isEditing && newMc
+                                      ? { value: newMc.matiere.id_matiere, label: selectedMatiereNom }
+                                      : selectedMatiere
+                                          ? {
+                                              value: selectedMatiere,
+                                              label: availableMatieres.find(m => m.id_matiere === Number(selectedMatiere))?.nom_matiere
+                                            }
+                                          : undefined
+                              }
+                              onChange={(e) => {
+                                  setSelectedMatiere(String(e.value));
+                                  setSelectedMatiereNom(String(e.label));
+                                  setNewMc({ ...newMc, matiere: { id_matiere: Number(e.value)} });
+                              }}
+                              disabled={isEditing ? !newMc?.matiere?.id_matiere : !selectedClasse}
+                          >
+                              {availableMatieres.map(matiere => (
+                                  <Select.Option key={matiere.id_matiere} value={matiere.id_matiere}>
+                                      {matiere.nom_matiere}
+                                  </Select.Option>
+                              ))}
+                          </Select>
                         </div>
                     </div>
 
@@ -552,7 +645,7 @@ const ProffesseursPage = () => {
                             className="bg-green-500 hover:bg-green-600 cursor-pointer text-white py-2 px-4 rounded-md"
                             onClick={async () => {
                                 if (isEditing) {
-
+                                    handleEditMc();
                                 } else {
                                     handleAddMc()
                                 }
@@ -564,13 +657,17 @@ const ProffesseursPage = () => {
                     </div>
                 </Modal>
             )}
+
+            <DeleteConfirmation showModal={open} handleModalClose={handleDeleteModalClose} handleDelete={async()=>{handleDelete(newProf)}}/>
+            <DeleteConfirmation showModal={deleteConfirmationOpen} handleModalClose={handleDeletemcModalClose} handleDelete={async()=>{handleDeleteMc(newMc)}}/>
+
             <div className="flex items-center justify-between py-4">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestion des Enseignants</h1>
                     <p className="text-gray-600">Gérez les informations et plannings de vos enseignants</p>  
                 </div>              
                 <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-                    <TableSearch placeholder="Recherche..."/>
+                    <TableSearch placeholder="Recherche..." value={searchTerm} onChange={setSearchTerm}/>
                     <div className="flex items-center gap-4 self-end">
                         <Dropdown menu={{items, onClick: handleMenuClick}}>
                             <button className="cursor-pointer w-8 h-8 flex items-center justify-center rounded-full bg-green-100">
@@ -590,7 +687,6 @@ const ProffesseursPage = () => {
                     </div>
                 </div>
             </div>
-
             <div className="w-full mt-4">
                     {groupByKey ? (
                         Object.entries(groupedUsers).map(([group, users]) => (

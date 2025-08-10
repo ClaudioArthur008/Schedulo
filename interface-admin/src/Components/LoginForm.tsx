@@ -124,12 +124,10 @@ export default function LoginForm() {
 
         if (validateForm()) {
             try {
-                // const response = await  api(token!).post('/auth/login', formData);
                 const token = sessionStorage.getItem("token");
                 const response = await  apilog.post('/auth/login', formData);
                 console.log('Utilisateur connecté avec succès :', response.data);
 
-                // Stocker le token dans localStorage ou sessionStorage selon l'option "Se souvenir de moi"
                 if (response.data.access_token) {
                     const storage = rememberMe ? localStorage : sessionStorage;
                     storage.setItem('token', response.data.access_token);

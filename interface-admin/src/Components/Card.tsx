@@ -3,6 +3,7 @@ import Image from "next/image";
 const Card = ({type}:{type:string}) => {
     const currentYear = new Date().getFullYear();
     const nextYearShort = (currentYear + 1).toString().slice(-2);
+
     return (
       <div className="rounded-2xl odd:bg-green-200 even:bg-yellow-100 p-4 flex-1 min-w-[130px]">
           <div className="flex justify-between items-center">

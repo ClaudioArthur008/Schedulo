@@ -5,7 +5,7 @@ import { approuveUser, deleteUser, getUser, User } from "@/function/user";
 import type { MenuProps } from 'antd';
 import { Card, Col, Dropdown, Modal, Row, Space, Switch } from 'antd';
 import { useEffect, useState } from "react";
-import { useSearchParams } from 'next/navigation';
+import { Trash2 } from "lucide-react";
 
 
 const UtilisateurPage = () => {
@@ -16,15 +16,14 @@ const UtilisateurPage = () => {
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [filtreActuel, setFiltreActuel] = useState<string | null>(null);
     const [groupByKey, setGroupByKey] = useState<'role' | 'statut' | null>(null);
-    const searchParams = useSearchParams();
-    const searchTerm = searchParams.get('search') || '';
+    const [searchTerm, setSearchTerm] = useState("");
 
     useEffect( () => {
          getUser(setUtilisateurs);
     }
     , []);
 
-        const utilisateursFiltres = utilisateurs.filter((item) => {
+    const utilisateursFiltres = utilisateurs.filter((item) => {
         const user =item.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.enseignant?.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.etudiant?.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -104,20 +103,80 @@ const UtilisateurPage = () => {
         setisDeleting(false);
     }
 
+    const ProfessorCard = ({ user }: { user: User }) => (
+    <div className="bg-white m-1 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 overflow-hidden">
+      <div className="p-6">
+        <div className="flex items-start justify-between ">
+          <div className="flex-1">
+            <div className="flex items-center gap-3">
+              <div className=" bg-black w-12 h-10  rounded-full flex items-center justify-center text-white font-semibold text-lg">
+                {user.etudiant
+                  ? `${user.etudiant?.nom.charAt(0)}${user.etudiant?.prenom.charAt(0)}`
+                  : `${user.enseignant?.nom.charAt(0)}${user.enseignant?.prenom.charAt(0)}`
+                }
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                {user.etudiant
+                  ? `${user.etudiant?.nom}`
+                  : `${user.enseignant?.nom}`
+                }
+                </h3>
+                <p className="text-lg font-base text-gray-700"> 
+                {user.etudiant
+                  ? ` ${user.etudiant?.prenom}`
+                  : `${user.enseignant?.prenom}`
+                }
+                </p>                
+                <p className="text-sm text-gray-500 font-mono">{user.role === 'admin' ? "Administrateur" : "Utilisateur"}</p>
+                <p className="text-sm text-gray-500 font-mono">{user.email}</p>  
+              </div>
+            </div>
+          </div>
+        </div>
 
+        <div className="flex justify-end gap-1">
+          <div className="flex gap-1 ">
+            <div className="p-2">
+                <Switch checked={user.approuve}  title="Approuver" 
+                style={{backgroundColor: user.approuve ? '#BEFF61' : '#EDF2E6'}}
+                onClick={() => {
+                        setShowModal(true);
+                        setApprouve(true);
+                        setSelectedUser(user);
+                    }}
+                />
+            </div>
+              
+            <button
+              onClick={async()=>{
+                setShowModal(true);
+                setisDeleting(true);
+                setSelectedUser(user);
+              }}
+              className="p-2  text-red-700 rounded-lg transition-colors"
+              title="Supprimer"
+            >
+              <Trash2 size={18} />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
     return (
         <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
             {showModal&&(
                 <Modal open={showModal} onCancel={handleModalClose} footer={null}>
                     <br />
-                    {isDeleting || approuve 
+                    {approuve 
                         ?(
                             <div>
-                                <p className=" font-semibold mb-4">Vous voulez vraiment {selectedUser?.approuve? "desapprouver" : "approuver"} le compte de cet utilisateur</p>
+                                <p className=" font-semibold mb-4">Vous voulez vraiment {selectedUser?.approuve? "désapprouver" : "approuver"} le compte de cet utilisateur</p>
                                     <div className="flex justify-end gap-2 mt-4">
                                         <button
                                             onClick={handleModalClose}
-                                            className="text-red-500 bg-gray-200 px-4 py-2 rounded hover:bg-gray-300 cursor-pointer"
+                                            className=" p-2 border-gray-500 bg-gray-100 text-gray-700  rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
                                         >
                                             Annuler
                                         </button>
@@ -127,7 +186,7 @@ const UtilisateurPage = () => {
                                                     await approuveUser(selectedUser?.id_utilisateur, setUtilisateurs)
                                                     await handleModalClose();
                                             }}
-                                            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 cursor-pointer"
+                                                className="p-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg transition-colors"
                                         > 
                                             {selectedUser?.approuve? "Désapprouver" : "Approuver"}
                                         </button>
@@ -139,7 +198,7 @@ const UtilisateurPage = () => {
                                         <div className="flex justify-end gap-2 mt-4">
                                             <button
                                                 onClick={handleModalClose}
-                                                className="text-red-500 bg-gray-200 px-4 py-2 rounded hover:bg-gray-300 cursor-pointer"
+                                                className=" p-2 border-gray-500 bg-gray-100 text-gray-700  rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
                                             >
                                                 Annuler
                                             </button>
@@ -149,7 +208,7 @@ const UtilisateurPage = () => {
                                                         await deleteUser(selectedUser?.id_utilisateur, setUtilisateurs)
                                                         await handleModalClose();
                                                     }}
-                                                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 cursor-pointer"
+                                                className="p-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg transition-colors"
                                             > 
                                                 Supprimer
                                             </button>
@@ -162,10 +221,13 @@ const UtilisateurPage = () => {
                     
                 </Modal>
             )}
-           <div className="flex items-center justify-between">
-                <h1 className="hidden md:block text-2xl font-semibold">Liste des utilisateurs</h1>
+           <div className="flex items-center justify-between py-4">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-1">Gestion des Utilisateurs</h1>
+                    <p className="text-gray-600">Gérez les informations de vos utilisateurs</p>  
+                </div> 
                 <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-                    <TableSearch placeholder= "Recherche..." />
+                    <TableSearch placeholder= "Recherche..." value={searchTerm} onChange={setSearchTerm}/>
                     <div className="flex items-center gap-4 self-end">
                         <Dropdown menu={{items, onClick: handleMenuClick}}>
                             <button className="cursor-pointer w-8 h-8 flex items-center justify-center rounded-full bg-green-100">
@@ -178,114 +240,38 @@ const UtilisateurPage = () => {
                     </div>
                 </div>
             </div>
-                <div className="w-full mt-4">
+            <div className="w-full">
                     {groupByKey ? (
                         Object.entries(groupedUsers).map(([group, users]) => (
                                 <>
-                                <p  className="font-semibold text-md bg-gray-100 py-2 px-4">{group? group.toUpperCase() : " Aucun"}</p>
+                                 <p  className="font-semibold text-md bg-gray-100 py-2 px-4">{group? group.toUpperCase() : " Aucun"}</p>
                                 <Row gutter={16} key={group} >
-                                    {users.map((user, index) => (                             
-                                        <Col span={8} className="py-4"  key={user.id_utilisateur} 
-                                        xs={24}
-                                        sm={+12}
-                                        md={ 8}  
-                                        >
-                                        <Card hoverable>
-                                            <div className="flex items-center py-5 justify-between gap-2 w-full">
-                                                <div>
-                                                    <p className="text-lg">
-                                                        <strong> Utilisateur n° : {user.id_utilisateur}</strong>
-                                                    </p>
-                                                    <p className="text-base">
-                                                        {user.email}
-                                                    </p>
-                                                    <p className="text-base">
-                                                        {user.role}
-                                                    </p>
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <button 
-                                                        title="Supprimer"
-                                                        className="py-2 px-4 cursor-pointer"
-                                                        onClick={() => {
-                                                            setShowModal(true);
-                                                            setApprouve(true);
-                                                            setSelectedUser(user);
-                                                        }}
-                                                    >
-                                                        <Switch checked={user.approuve} disabled />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => {
-                                                            setShowModal(true);
-                                                            setisDeleting(true);
-                                                            setSelectedUser(user);
-                                                        }}
-                                                        className="cursor-pointer w-8 h-8 flex items-center justify-center rounded-full bg-red-200"
-                                                    >
-                                                        <Image src="/delete.png" alt="Supprimer" width={20} height={20} />
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                            </Card>
-                                        </Col>
-                            
-                                    ))}   
+                                {users.map((user) => (
+                                    <Col span={8} className="py-4"  key={user.id_utilisateur} 
+                                            xs={24}
+                                            sm={12}
+                                            md={8}  
+                                            lg={6}  
+                                    >
+                                    <ProfessorCard key={user.id_utilisateur } user={user} />
+                                    </Col>
+                                    ))}
                                 </Row>
                                 </>
                         ))
                     ):(
-                    <Row gutter={16}  >
-                                    {utilisateursFiltres.map((user, index) => (                             
-                                        <Col span={8} className="py-4"  key={user.id_utilisateur} 
-                                        xs={24}
-                                        sm={+12}
-                                        md={ 8}  
-                                        >
-                                        <Card hoverable>
-                                            <div className="flex items-center py-5 justify-between gap-2 w-full">
-                                                <div>
-                                                    <p className="text-lg">
-                                                        <strong> Utilisateur n° : {user.id_utilisateur}</strong>
-                                                    </p>
-                                                    <p className="text-base">
-                                                        {user.email}
-                                                    </p>
-                                                    <p className="text-base">
-                                                        {user.role}
-                                                    </p>
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <button 
-                                                        title="Supprimer"
-                                                        className="py-2 px-4 cursor-pointer"
-                                                        onClick={() => {
-                                                            setShowModal(true);
-                                                            setApprouve(true);
-                                                            setSelectedUser(user);
-                                                        }}
-                                                    >
-                                                        <Switch checked={user.approuve} disabled />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => {
-                                                            setShowModal(true);
-                                                            setisDeleting(true);
-                                                            setSelectedUser(user);
-                                                        }}
-                                                        className="cursor-pointer w-8 h-8 flex items-center justify-center rounded-full bg-red-200"
-                                                    >
-                                                        <Image src="/delete.png" alt="Supprimer" width={20} height={20} />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            </Card>
-                                        </Col>
-                            
-                                    ))}
-                                
-                                </Row>
+                        <Row gutter={16}>
+                            {utilisateursFiltres.map((user) => (
+                                <Col span={8} className="py-4"  key={user.id_utilisateur} 
+                                            xs={24}
+                                            sm={12}
+                                            md={8} 
+                                            lg={6}   
+                                >
+                                    <ProfessorCard key={user.id_utilisateur } user={user} />
+                                </Col>
+                        ))}
+                        </Row>
                     )
                     }
             </div>
